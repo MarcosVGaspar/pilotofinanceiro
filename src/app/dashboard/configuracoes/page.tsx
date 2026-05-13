@@ -35,7 +35,7 @@ export default function ConfigPage() {
         preco_etanol: String(c.preco_etanol || ''),
         preco_diesel: String(c.preco_diesel || ''),
         consumo_medio: String(c.consumo_medio || ''),
-        custo_fixo_veiculo: String(c.custo_fixo_veiculo || '')
+        custo_fixo_veiculo: String(c.custo_fixo_veiculo || ''),
         renda_fixa_mensal: String(c.renda_fixa_mensal || ''),
 
       })
