@@ -5,10 +5,12 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 const items = [
+  { href: '/dashboard/rendas',        icon: '💰', label: 'Rendas',        sub: 'Salários e receitas extras' },
   { href: '/dashboard/veiculo',       icon: '⛽', label: 'Veículo',        sub: 'Abastecimentos e manutenções' },
   { href: '/dashboard/fluxo',         icon: '📊', label: 'Fluxo de Caixa', sub: 'Extrato e calendário' },
   { href: '/dashboard/configuracoes', icon: '⚙️', label: 'Configurações',  sub: 'Perfil, metas e combustível' },
 ]
+
 
 export default function MaisPage() {
   const router = useRouter()
