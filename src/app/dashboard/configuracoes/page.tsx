@@ -11,10 +11,11 @@ export default function ConfigPage() {
     nome: '', cidade: '', meta_mensal: '', meta_corridas: ''
   })
   const [config, setConfig] = useState({
-    preco_gasolina: '', preco_etanol: '',
-    preco_diesel: '', consumo_medio: '',
-    custo_fixo_veiculo: ''
-  })
+  preco_gasolina: '', preco_etanol: '',
+  preco_diesel: '', consumo_medio: '',
+  custo_fixo_veiculo: '', renda_fixa_mensal: ''
+})
+
 
   useEffect(() => {
     async function load() {
