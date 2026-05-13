@@ -10,8 +10,19 @@ export default function DashboardLayout({
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
       <Sidebar userName="Piloto" />
-      <main className="main-content" style={{ flex: 1, minHeight: '100vh', paddingBottom: '80px' }}>
-        <div style={{ padding: '24px', maxWidth: '1280px', margin: '0 auto' }}>
+      <main className="main-content" style={{
+        flex: 1,
+        minHeight: '100vh',
+        paddingBottom: '80px',
+        minWidth: 0,
+        overflow: 'hidden',
+      }}>
+        <div style={{
+          padding: '16px',
+          maxWidth: '100%',
+          overflow: 'hidden',
+          boxSizing: 'border-box',
+        }}>
           {children}
         </div>
       </main>
