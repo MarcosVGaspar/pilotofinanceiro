@@ -12,32 +12,32 @@ export default function LoginPage() {
   const [form, setForm] = useState({ nome: '', email: '', senha: '' })
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setLoading(true); setError('')
-    try {
-      if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({
-          email: form.email,
-          password: form.senha
-        })
-        if (error) throw error
-        router.push('/dashboard')
-        router.refresh()
-      } else {
-        const { error } = await supabase.auth.signUp({
-          email: form.email,
-          password: form.senha,
-          options: { data: { nome: form.nome } }
-        })
-        if (error) throw error
-        setError('✅ Conta criada! Verifique seu e-mail.')
-      }
-    } catch (err: any) {
-      setError(err.message || 'Erro ao autenticar')
-    } finally {
-      setLoading(false)
+  e.preventDefault()
+  setLoading(true); setError('')
+  try {
+    if (isLogin) {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: form.email,
+        password: form.senha
+      })
+      if (error) throw error
+      window.location.href = '/dashboard'
+    } else {
+      const { error } = await supabase.auth.signUp({
+        email: form.email,
+        password: form.senha,
+        options: { data: { nome: form.nome } }
+      })
+      if (error) throw error
+      setError('✅ Conta criada! Verifique seu e-mail.')
     }
+  } catch (err: any) {
+    setError(err.message || 'Erro ao autenticar')
+  } finally {
+    setLoading(false)
   }
+}
+
 
   return (
     <div className="login-page">
