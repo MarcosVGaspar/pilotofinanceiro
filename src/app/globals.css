@@ -361,3 +361,55 @@ body::after {
 
 @media(max-width:1024px) { .sidebar{display:none!important;} }
 @media(min-width:1025px) { .bottom-nav{display:none!important;} .main-content{margin-left:240px;} }
+/* ============================================================
+   MOBILE FIXES
+   ============================================================ */
+@media(max-width:768px) {
+  .main-content { padding-bottom: 80px !important; }
+
+  /* Prevent horizontal overflow */
+  .anim-fade, .glass-card, .form-panel { max-width: 100%; }
+
+  /* Fix page padding */
+  .main-content > div { padding: 16px !important; }
+
+  /* Fix header buttons wrapping */
+  .main-content h1 { font-size: 24px !important; }
+
+  /* Fix 3-col grids → 1 col */
+  div[style*="repeat(3,1fr)"] {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  /* Fix chart overflow */
+  .recharts-wrapper { max-width: 100% !important; overflow: hidden; }
+
+  /* Fix tables */
+  .pf-table-wrap, .glass-card > div { overflow-x: auto; }
+
+  /* Fix fluxo summary cards */
+  div[style*="repeat(3,1fr)"] .kpi-card .kpi-value {
+    font-size: 16px !important;
+  }
+
+  /* Fix dashboard charts grid */
+  div[style*="1.6fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Fix veiculo 4 cols */
+  div[style*="repeat(4,1fr)"] {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  /* Fix rendas 2 cols */
+  div[style*="1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Buttons full width on mobile */
+  .btn-primary, .btn-secondary {
+    font-size: 13px !important;
+    padding: 9px 14px !important;
+  }
+}
