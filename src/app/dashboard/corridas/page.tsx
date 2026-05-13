@@ -133,7 +133,7 @@ export default function CorridasPage() {
               </button>
             ))}
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', width: '100%' }}>
             <div><label style={labelStyle}>Data</label><input type="date" style={inputStyle} value={form.data} onChange={e => setForm({ ...form, data: e.target.value })} /></div>
             <div><label style={labelStyle}>Qtd corridas</label><input type="number" min="1" style={inputStyle} value={form.quantidade_corridas} onChange={e => setForm({ ...form, quantidade_corridas: e.target.value })} /></div>
             <div><label style={labelStyle}>Valor (R$)</label><input type="number" step="0.01" style={inputStyle} value={form.valor} onChange={e => setForm({ ...form, valor: e.target.value })} /></div>
