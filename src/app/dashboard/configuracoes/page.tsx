@@ -121,7 +121,8 @@ export default function ConfigPage() {
         <p style={{ fontFamily: 'var(--font-display)', fontSize: '14px', fontWeight: 700, color: 'var(--text-1)', marginBottom: '16px' }}>
           ⛽ Combustível
         </p>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', width: '100%' }}>
+
           <div>
             <label style={S.label}>Gasolina (R$/L)</label>
             <input type="number" step="0.01" style={S.input} value={config.preco_gasolina}
