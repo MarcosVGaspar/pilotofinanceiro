@@ -54,7 +54,11 @@ export default function RendasPage() {
 
   function edit(r: any) {
     setEditing(r)
-    setForm({ tipo: r.tipo, descricao: r.descricao, valor: String(r.valor), data: r.data, recorrencia: r.recorrencia, recebido: r.recebido })
+    setForm({
+      tipo: r.tipo, descricao: r.descricao,
+      valor: String(r.valor), data: r.data,
+      recorrencia: r.recorrencia, recebido: r.recebido
+    })
     setShowForm(true)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -65,9 +69,18 @@ export default function RendasPage() {
   const recorrentes = rendas.filter(r => r.recorrencia !== 'unica')
   const avulsas = rendas.filter(r => r.recorrencia === 'unica')
 
-  const S = {
-    label: { display: 'block' as const, fontSize: '11px', fontWeight: '700' as const, textTransform: 'uppercase' as const, letterSpacing: '.1em', color: 'var(--text-3)', marginBottom: '7px' },
-    input: { width: '100%', padding: '11px 16px', background: 'rgba(255,255,255,.03)', border: '1px solid rgba(255,255,255,.1)', borderRadius: '8px', color: 'var(--text-1)', fontFamily: 'inherit', fontSize: '14px', outline: 'none', appearance: 'none' as const },
+  const inputStyle = {
+    width: '100%', padding: '11px 16px',
+    background: 'rgba(255,255,255,.03)',
+    border: '1px solid rgba(255,255,255,.1)',
+    borderRadius: '8px', color: 'var(--text-1)',
+    fontFamily: 'inherit', fontSize: '14px',
+    outline: 'none', appearance: 'none' as const
+  }
+  const labelStyle = {
+    display: 'block' as const, fontSize: '11px',
+    fontWeight: '700' as const, textTransform: 'uppercase' as const,
+    letterSpacing: '.1em', color: 'var(--text-3)', marginBottom: '7px'
   }
 
   const RendaItem = ({ r }: { r: any }) => (
@@ -105,9 +118,9 @@ export default function RendasPage() {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '12px', marginBottom: '20px' }}>
         {[
-          { label: 'Total do Mês',  value: fmt$(total), color: 'var(--accent)' },
-          { label: 'Recorrentes',   value: String(recorrentes.length), color: 'var(--cyan)' },
-          { label: 'Pendentes',     value: fmt$(rendas.filter(r => !r.recebido).reduce((a, r) => a + Number(r.valor), 0)), color: 'var(--warn)' },
+          { label: 'Total do Mês', value: fmt$(total), color: 'var(--accent)' },
+          { label: 'Recorrentes', value: String(recorrentes.length), color: 'var(--cyan)' },
+          { label: 'Pendentes', value: fmt$(rendas.filter(r => !r.recebido).reduce((a, r) => a + Number(r.valor), 0)), color: 'var(--warn)' },
         ].map((s, i) => (
           <div key={i} className="glass-card kpi-card">
             <p className="kpi-label">{s.label}</p>
@@ -123,27 +136,69 @@ export default function RendasPage() {
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
             <div>
-              <label style={S.label}>Tipo</label>
-              <select style={S.input} value={form.tipo} onChange={e => setForm({ ...form, tipo: e.target.value })}>
+              <label style={labelStyle}>Tipo</label>
+              <select style={inputStyle} value={form.tipo} onChange={e => setForm({ ...form, tipo: e.target.value })}>
                 {Object.entries(TIPOS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
               </select>
             </div>
             <div>
-              <label style={S.label}>Recorrência</label>
-              <select style={S.input} value={form.recorrencia} onChange={e => setForm({ ...form, recorrencia: e.target.value })}>
+              <label style={labelStyle}>Recorrência</label>
+              <select style={inputStyle} value={form.recorrencia} onChange={e => setForm({ ...form, recorrencia: e.target.value })}>
                 <option value="unica">Única</option>
                 <option value="mensal">Mensal</option>
                 <option value="semanal">Semanal</option>
               </select>
             </div>
             <div style={{ gridColumn: 'span 2' }}>
-              <label style={S.label}>Descrição</label>
-              <input type="text" style={S.input} value={form.descricao} onChange={e => setForm({ ...form, descricao: e.target.value })} placeholder="Ex: Salário empresa X" />
+              <label style={labelStyle}>Descrição</label>
+              <input type="text" style={inputStyle} value={form.descricao} onChange={e => setForm({ ...form, descricao: e.target.value })} placeholder="Ex: Salário empresa X" />
             </div>
             <div>
-              <label style={S.label}>Valor (R$)</label>
-              <input type="number" step="0.01" style={S.input} value={form.valor} onChange={e => setForm({ ...form, valor: e.target.value })} />
+              <label style={labelStyle}>Valor (R$)</label>
+              <input type="number" step="0.01" style={inputStyle} value={form.valor} onChange={e => setForm({ ...form, valor: e.target.value })} />
             </div>
             <div>
-              <label style={S.label}>Data</label>
-              <input type="date"
+              <label style={labelStyle}>Data</label>
+              <input type="date" style={inputStyle} value={form.data} onChange={e => setForm({ ...form, data: e.target.value })} />
+            </div>
+          </div>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '12px', cursor: 'pointer' }}>
+            <input type="checkbox" checked={form.recebido} onChange={e => setForm({ ...form, recebido: e.target.checked })} />
+            <span style={{ fontSize: '13px', color: 'var(--text-2)' }}>Já recebido</span>
+          </label>
+          <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', marginTop: '16px' }}>
+            <button className="btn-secondary" onClick={() => { setShowForm(false); setEditing(null) }}>Cancelar</button>
+            <button className="btn-primary" onClick={save}>Salvar</button>
+          </div>
+        </div>
+      )}
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+        <div className="glass-card" style={{ padding: '22px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '14px', fontWeight: 700, color: 'var(--text-1)' }}>Recorrentes</p>
+            <span className="chip chip-fixa">{recorrentes.length}</span>
+          </div>
+          {loading
+            ? <p style={{ color: 'var(--text-3)' }}>Carregando...</p>
+            : recorrentes.length === 0
+              ? <div className="empty-state" style={{ padding: '24px 0' }}><div className="empty-icon">📅</div><p className="empty-text">Nenhuma renda recorrente</p></div>
+              : recorrentes.map(r => <RendaItem key={r.id} r={r} />)
+          }
+        </div>
+        <div className="glass-card" style={{ padding: '22px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '14px', fontWeight: 700, color: 'var(--text-1)' }}>Avulsas / Extras</p>
+            <span className="chip chip-variavel">{avulsas.length}</span>
+          </div>
+          {loading
+            ? <p style={{ color: 'var(--text-3)' }}>Carregando...</p>
+            : avulsas.length === 0
+              ? <div className="empty-state" style={{ padding: '24px 0' }}><div className="empty-icon">💰</div><p className="empty-text">Nenhuma renda avulsa</p></div>
+              : avulsas.map(r => <RendaItem key={r.id} r={r} />)
+          }
+        </div>
+      </div>
+    </div>
+  )
+}
