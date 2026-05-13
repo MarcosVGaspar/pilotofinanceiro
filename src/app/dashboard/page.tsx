@@ -117,25 +117,25 @@ export default function DashboardPage() {
               Aqui está o resumo das suas finanças
             </p>
           </div>
-          <div style={{
-            padding: '16px 24px', borderRadius: '14px', textAlign: 'right',
-            background: isPositive ? 'rgba(0,255,135,.07)' : 'rgba(255,71,87,.07)',
-            border: `1px solid ${isPositive ? 'rgba(0,255,135,.18)' : 'rgba(255,71,87,.18)'}`,
-          }}>
-            <p style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.1em', color: 'var(--text-3)', marginBottom: '4px' }}>
-              Saldo do Mês
-            </p>
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 800, color: isPositive ? 'var(--accent)' : 'var(--danger)', letterSpacing: '-.02em' }}>
-              {fmt$(saldo)}
-            </p>
-          </div>
-        </div>
-      </div>
+         <div style={{
+  padding: '12px 16px', borderRadius: '14px', textAlign: 'center',
+  background: isPositive ? 'rgba(0,255,135,.07)' : 'rgba(255,71,87,.07)',
+  border: `1px solid ${isPositive ? 'rgba(0,255,135,.18)' : 'rgba(255,71,87,.18)'}`,
+  marginTop: '12px', width: '100%',
+}}>
+  <p style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.1em', color: 'var(--text-3)', marginBottom: '4px' }}>
+    Saldo do Mês
+  </p>
+  <p style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 800, color: isPositive ? 'var(--accent)' : 'var(--danger)', letterSpacing: '-.02em' }}>
+    {fmt$(saldo)}
+  </p>
+</div>
+
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px', marginBottom: '20px' }}>
         {kpis.map((k, i) => (
           <div key={i} className={`glass-card kpi-card glow anim-up ${k.delay}`}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <p className="kpi-label">{k.label}</p>
               <span style={{ fontSize: '22px', opacity: .8 }}>{k.icon}</span>
             </div>
