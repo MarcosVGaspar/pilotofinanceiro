@@ -1,14 +1,14 @@
 'use client'
-import React, { useState, useEffect, useCallback } from 'react'
+import React from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 const nav = [
   { href: '/dashboard',               icon: '◉', label: 'Início'   },
   { href: '/dashboard/corridas',      icon: '🚗', label: 'Corridas' },
+  { href: '/dashboard/rendas',        icon: '💰', label: 'Rendas'   },
   { href: '/dashboard/despesas',      icon: '💳', label: 'Despesas' },
   { href: '/dashboard/fluxo',         icon: '📊', label: 'Fluxo'    },
-  { href: '/dashboard/configuracoes', icon: '⚙️', label: 'Config'   },
 ]
 
 export default function BottomNav() {
