@@ -44,27 +44,60 @@ export default function ConfigPage() {
   }, [supabase])
 
   async function saveAll() {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-    await Promise.all([
-      supabase.from('profiles').update({
-        nome: profile.nome,
-        cidade: profile.cidade,
-        meta_mensal: parseFloat(profile.meta_mensal) || 0,
-        meta_corridas: parseInt(profile.meta_corridas) || 0,
-      }).eq('id', user.id),
-      supabase.from('configuracoes').update({
-        preco_gasolina: parseFloat(config.preco_gasolina) || 0,
-        preco_etanol: parseFloat(config.preco_etanol) || 0,
-        preco_diesel: parseFloat(config.preco_diesel) || 0,
-        consumo_medio: parseFloat(config.consumo_medio) || 0,
-        custo_fixo_veiculo: parseFloat(config.custo_fixo_veiculo) || 0,
-        renda_fixa_mensal: parseFloat(config.renda_fixa_mensal) || 0,
-      }).eq('user_id', user.id),
-    ])
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2500)
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+
+  const rendaFixa = parseFloat(config.renda_fixa_mensal) || 0
+
+  await Promise.all([
+    supabase.from('profiles').update({
+      nome: profile.nome,
+      cidade: profile.cidade,
+      meta_mensal: parseFloat(profile.meta_mensal) || 0,
+      meta_corridas: parseInt(profile.meta_corridas) || 0,
+    }).eq('id', user.id),
+    supabase.from('configuracoes').update({
+      preco_gasolina: parseFloat(config.preco_gasolina) || 0,
+      preco_etanol: parseFloat(config.preco_etanol) || 0,
+      preco_diesel: parseFloat(config.preco_diesel) || 0,
+      consumo_medio: parseFloat(config.consumo_medio) || 0,
+      custo_fixo_veiculo: parseFloat(config.custo_fixo_veiculo) || 0,
+      renda_fixa_mensal: rendaFixa,
+    }).eq('user_id', user.id),
+  ])
+
+  // Lançar renda fixa automaticamente se informada
+  if (rendaFixa > 0) {
+    const now = new Date()
+    const primeiroDia = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`
+
+    // Verificar se já existe lançamento deste mês
+    const { data: existing } = await supabase
+      .from('rendas')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('tipo', 'salario')
+      .eq('recorrencia', 'mensal')
+      .gte('data', primeiroDia)
+      .single()
+
+    if (!existing) {
+      await supabase.from('rendas').insert({
+        user_id: user.id,
+        tipo: 'salario',
+        descricao: 'Renda fixa mensal',
+        valor: rendaFixa,
+        data: primeiroDia,
+        recorrencia: 'mensal',
+        recebido: true,
+      })
+    }
   }
+
+  setSaved(true)
+  setTimeout(() => setSaved(false), 2500)
+}
+
 
   async function signOut() {
     await supabase.auth.signOut()
