@@ -21,9 +21,18 @@ export default function LoginPage() {
         email: form.email,
         password: form.senha
       })
-      if (error) throw error
-      if (data.session) {
-        window.location.replace('/dashboard')
+      console.log('LOGIN RESULT:', JSON.stringify({ data, error }))
+      if (error) {
+        setError(error.message)
+        return
+      }
+      if (data?.session) {
+        setError('✅ Sessão criada! Redirecionando...')
+        setTimeout(() => {
+          window.location.replace('/dashboard')
+        }, 1000)
+      } else {
+        setError('❌ Sem sessão retornada')
       }
     } else {
       const { error } = await supabase.auth.signUp({
@@ -40,6 +49,7 @@ export default function LoginPage() {
     setLoading(false)
   }
 }
+
 
 
 
