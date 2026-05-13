@@ -12,75 +12,39 @@ export default function LoginPage() {
   const [form, setForm] = useState({ nome: '', email: '', senha: '' })
 
   async function handleSubmit(e: React.FormEvent) {
-  e.preventDefault()
-  setLoading(true)
-  setError('')
-  try {
-    if (isLogin) {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: form.email,
-        password: form.senha
-      })
-      if (error) throw error
-      if (data?.session) {
-        setError('✅ Sessão iniciada! Redirecionando...')
-        window.location.href = '/dashboard'
+    e.preventDefault()
+    setLoading(true)
+    setError('')
+    try {
+      if (isLogin) {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: form.email,
+          password: form.senha
+        })
+        if (error) throw error
+        if (data?.session) {
+          window.location.href = '/dashboard'
+        }
+      } else {
+        const { error } = await supabase.auth.signUp({
+          email: form.email,
+          password: form.senha,
+          options: { data: { nome: form.nome } }
+        })
+        if (error) throw error
+        setError('✅ Conta criada! Verifique seu e-mail.')
       }
-    } else {
-      const { error } = await supabase.auth.signUp({
-        email: form.email,
-        password: form.senha,
-        options: { data: { nome: form.nome } }
-      })
-      if (error) throw error
-      setError('✅ Conta criada! Verifique seu e-mail.')
+    } catch (err: any) {
+      setError(err.message || 'Erro ao autenticar')
+    } finally {
+      setLoading(false)
     }
-  } catch (err: any) {
-    setError(err.message || 'Erro ao autenticar')
-  } finally {
-    setLoading(false)
   }
-}
-async function handleSubmit(e: React.FormEvent) {
-  e.preventDefault()
-  setLoading(true)
-  setError('')
-  try {
-    if (isLogin) {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: form.email,
-        password: form.senha
-      })
-      if (error) throw error
-      if (data?.session) {
-        setError('✅ Sessão iniciada! Redirecionando...')
-        window.location.href = '/dashboard'
-      }
-    } else {
-      const { error } = await supabase.auth.signUp({
-        email: form.email,
-        password: form.senha,
-        options: { data: { nome: form.nome } }
-      })
-      if (error) throw error
-      setError('✅ Conta criada! Verifique seu e-mail.')
-    }
-  } catch (err: any) {
-    setError(err.message || 'Erro ao autenticar')
-  } finally {
-    setLoading(false)
-  }
-}
-
-
-
-
 
   return (
     <div className="login-page">
       <div className="orb1" />
       <div className="orb2" />
-
       <div style={{ width: '100%', maxWidth: '420px', position: 'relative', zIndex: 1 }}>
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           <div style={{
@@ -102,11 +66,7 @@ async function handleSubmit(e: React.FormEvent) {
               <line x1="76" y1="20" x2="76" y2="50" stroke="#00D4FF" strokeWidth="5" strokeLinecap="round"/>
             </svg>
           </div>
-          <h1 style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: '24px', fontWeight: 800,
-            color: 'var(--text-1)', letterSpacing: '-.02em'
-          }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 800, color: 'var(--text-1)', letterSpacing: '-.02em' }}>
             Piloto<span style={{ color: 'var(--accent)' }}>Financeiro</span>
           </h1>
           <p style={{ fontSize: '14px', color: 'var(--text-3)', marginTop: '6px' }}>
@@ -115,12 +75,7 @@ async function handleSubmit(e: React.FormEvent) {
         </div>
 
         <div className="login-card anim-up">
-          <h2 style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: '18px', fontWeight: 700,
-            color: 'var(--text-1)', marginBottom: '24px',
-            letterSpacing: '-.01em'
-          }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 700, color: 'var(--text-1)', marginBottom: '24px', letterSpacing: '-.01em' }}>
             {isLogin ? 'Entrar na plataforma' : 'Criar conta grátis'}
           </h2>
 
@@ -156,12 +111,9 @@ async function handleSubmit(e: React.FormEvent) {
               <div style={{
                 padding: '12px 14px', borderRadius: '10px',
                 fontSize: '13px', fontWeight: 500,
-                background: error.startsWith('✅')
-                  ? 'rgba(0,255,135,.07)' : 'rgba(255,71,87,.07)',
-                color: error.startsWith('✅')
-                  ? 'var(--accent)' : 'var(--danger)',
-                border: `1px solid ${error.startsWith('✅')
-                  ? 'rgba(0,255,135,.2)' : 'rgba(255,71,87,.2)'}`,
+                background: error.startsWith('✅') ? 'rgba(0,255,135,.07)' : 'rgba(255,71,87,.07)',
+                color: error.startsWith('✅') ? 'var(--accent)' : 'var(--danger)',
+                border: `1px solid ${error.startsWith('✅') ? 'rgba(0,255,135,.2)' : 'rgba(255,71,87,.2)'}`,
               }}>
                 {error}
               </div>
@@ -174,20 +126,11 @@ async function handleSubmit(e: React.FormEvent) {
             </button>
           </form>
 
-          <div style={{
-            marginTop: '20px', paddingTop: '20px',
-            borderTop: '1px solid var(--border)',
-            textAlign: 'center'
-          }}>
+          <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px solid var(--border)', textAlign: 'center' }}>
             <button
               onClick={() => { setIsLogin(!isLogin); setError('') }}
-              style={{
-                background: 'none', border: 'none', cursor: 'pointer',
-                fontSize: '13px', color: 'var(--text-3)'
-              }}>
-              {isLogin
-                ? 'Não tem conta? Cadastre-se grátis →'
-                : '← Já tem conta? Faça login'}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', color: 'var(--text-3)' }}>
+              {isLogin ? 'Não tem conta? Cadastre-se grátis →' : '← Já tem conta? Faça login'}
             </button>
           </div>
         </div>
