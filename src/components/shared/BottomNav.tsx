@@ -8,7 +8,7 @@ const nav = [
   { href: '/dashboard/corridas',      icon: '🚗', label: 'Corridas' },
   { href: '/dashboard/rendas',        icon: '💰', label: 'Rendas'   },
   { href: '/dashboard/despesas',      icon: '💳', label: 'Despesas' },
-  { href: '/dashboard/fluxo',         icon: '📊', label: 'Fluxo'    },
+  { href: '/dashboard/mais',          icon: '☰',  label: 'Mais'     },
 ]
 
 export default function BottomNav() {
@@ -21,7 +21,7 @@ export default function BottomNav() {
           <Link
             key={item.href}
             href={item.href}
-            className={`bnav-item${pathname === item.href ? ' active' : ''}`}
+            className={`bnav-item${pathname === item.href || (item.href === '/dashboard/mais' && ['/dashboard/veiculo','/dashboard/fluxo','/dashboard/configuracoes'].includes(pathname)) ? ' active' : ''}`}
           >
             <span style={{ fontSize: '21px', lineHeight: 1 }}>{item.icon}</span>
             <span>{item.label}</span>
