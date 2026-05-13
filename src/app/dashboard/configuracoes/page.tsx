@@ -118,6 +118,21 @@ export default function ConfigPage() {
           </div>
         </div>
       </div>
+<div style={S.card}>
+  <p style={{ fontFamily: 'var(--font-display)', fontSize: '14px', fontWeight: 700, color: 'var(--text-1)', marginBottom: '16px' }}>
+    💰 Renda Extra Fixa
+  </p>
+  <p style={{ fontSize: '12px', color: 'var(--text-3)', marginBottom: '12px' }}>
+    Valor fixo mensal (salário, benefício) usado para calcular a meta diária de corridas.
+  </p>
+  <div>
+    <label style={S.label}>Renda fixa mensal (R$)</label>
+    <input type="number" step="0.01" style={S.input}
+      value={config.renda_fixa_mensal}
+      onChange={e => setConfig({ ...config, renda_fixa_mensal: e.target.value })}
+      placeholder="Ex: 1500,00" />
+  </div>
+</div>
 
      <div style={S.card}>
   <p style={{ fontFamily: 'var(--font-display)', fontSize: '14px', fontWeight: 700, color: 'var(--text-1)', marginBottom: '16px' }}>
