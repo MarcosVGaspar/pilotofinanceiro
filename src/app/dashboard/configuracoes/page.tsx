@@ -118,39 +118,41 @@ export default function ConfigPage() {
         </div>
       </div>
 
-      <div style={S.card}>
-        <p style={{ fontFamily: 'var(--font-display)', fontSize: '14px', fontWeight: 700, color: 'var(--text-1)', marginBottom: '16px' }}>
-          ⛽ Combustível
-        </p>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', width: '100%' }}>
-
-          <div>
-            <label style={S.label}>Gasolina (R$/L)</label>
-            <input type="number" step="0.01" style={S.input} value={config.preco_gasolina}
-              onChange={e => setConfig({ ...config, preco_gasolina: e.target.value })} />
-          </div>
-          <div>
-            <label style={S.label}>Etanol (R$/L)</label>
-            <input type="number" step="0.01" style={S.input} value={config.preco_etanol}
-              onChange={e => setConfig({ ...config, preco_etanol: e.target.value })} />
-          </div>
-          <div>
-            <label style={S.label}>Diesel (R$/L)</label>
-            <input type="number" step="0.01" style={S.input} value={config.preco_diesel}
-              onChange={e => setConfig({ ...config, preco_diesel: e.target.value })} />
-          </div>
-          <div>
-            <label style={S.label}>Consumo médio (km/L)</label>
-            <input type="number" step="0.1" style={S.input} value={config.consumo_medio}
-              onChange={e => setConfig({ ...config, consumo_medio: e.target.value })} />
-          </div>
-          <div style={{ gridColumn: 'span 2' }}>
-            <label style={S.label}>Custo fixo veículo/mês (R$)</label>
-            <input type="number" step="0.01" style={S.input} value={config.custo_fixo_veiculo}
-              onChange={e => setConfig({ ...config, custo_fixo_veiculo: e.target.value })} />
-          </div>
-        </div>
+     <div style={S.card}>
+  <p style={{ fontFamily: 'var(--font-display)', fontSize: '14px', fontWeight: 700, color: 'var(--text-1)', marginBottom: '16px' }}>
+    ⛽ Combustível
+  </p>
+  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+      <div>
+        <label style={S.label}>Gasolina (R$/L)</label>
+        <input type="number" step="0.01" style={S.input} value={config.preco_gasolina}
+          onChange={e => setConfig({ ...config, preco_gasolina: e.target.value })} />
       </div>
+      <div>
+        <label style={S.label}>Etanol (R$/L)</label>
+        <input type="number" step="0.01" style={S.input} value={config.preco_etanol}
+          onChange={e => setConfig({ ...config, preco_etanol: e.target.value })} />
+      </div>
+      <div>
+        <label style={S.label}>Diesel (R$/L)</label>
+        <input type="number" step="0.01" style={S.input} value={config.preco_diesel}
+          onChange={e => setConfig({ ...config, preco_diesel: e.target.value })} />
+      </div>
+      <div>
+        <label style={S.label}>Consumo (km/L)</label>
+        <input type="number" step="0.1" style={S.input} value={config.consumo_medio}
+          onChange={e => setConfig({ ...config, consumo_medio: e.target.value })} />
+      </div>
+    </div>
+    <div>
+      <label style={S.label}>Custo fixo veículo/mês (R$)</label>
+      <input type="number" step="0.01" style={S.input} value={config.custo_fixo_veiculo}
+        onChange={e => setConfig({ ...config, custo_fixo_veiculo: e.target.value })} />
+    </div>
+  </div>
+</div>
+
 
       <button className="btn-primary" onClick={saveAll}
         style={{ width: '100%', padding: '14px', fontSize: '15px', marginBottom: '12px' }}>
