@@ -21,18 +21,10 @@ export default function LoginPage() {
         email: form.email,
         password: form.senha
       })
-      console.log('LOGIN RESULT:', JSON.stringify({ data, error }))
-      if (error) {
-        setError(error.message)
-        return
-      }
+      if (error) throw error
       if (data?.session) {
-        setError('✅ Sessão criada! Redirecionando...')
-        setTimeout(() => {
-          window.location.replace('/dashboard')
-        }, 1000)
-      } else {
-        setError('❌ Sem sessão retornada')
+        setError('✅ Sessão iniciada! Redirecionando...')
+        window.location.href = '/dashboard'
       }
     } else {
       const { error } = await supabase.auth.signUp({
@@ -49,6 +41,37 @@ export default function LoginPage() {
     setLoading(false)
   }
 }
+async function handleSubmit(e: React.FormEvent) {
+  e.preventDefault()
+  setLoading(true)
+  setError('')
+  try {
+    if (isLogin) {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: form.email,
+        password: form.senha
+      })
+      if (error) throw error
+      if (data?.session) {
+        setError('✅ Sessão iniciada! Redirecionando...')
+        window.location.href = '/dashboard'
+      }
+    } else {
+      const { error } = await supabase.auth.signUp({
+        email: form.email,
+        password: form.senha,
+        options: { data: { nome: form.nome } }
+      })
+      if (error) throw error
+      setError('✅ Conta criada! Verifique seu e-mail.')
+    }
+  } catch (err: any) {
+    setError(err.message || 'Erro ao autenticar')
+  } finally {
+    setLoading(false)
+  }
+}
+
 
 
 
