@@ -105,18 +105,19 @@ export default function CorridasPage() {
         </button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '12px', marginBottom: '20px' }}>
-        {[
-          { label: 'Total Faturado', value: fmt$(totalV), color: 'var(--accent)' },
-          { label: 'Corridas', value: String(totalQ), color: 'var(--text-1)' },
-          { label: 'KM Rodados', value: `${totalKm.toFixed(0)} km`, color: 'var(--text-2)' },
-        ].map((s, i) => (
-          <div key={i} className="glass-card kpi-card">
-            <p className="kpi-label">{s.label}</p>
-            <p className="kpi-value" style={{ color: s.color, fontSize: '20px' }}>{s.value}</p>
-          </div>
-        ))}
-      </div>
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '20px' }}>
+  {[
+    { label: 'Faturado', value: fmt$(totalV), color: 'var(--accent)' },
+    { label: 'Corridas', value: String(totalQ), color: 'var(--text-1)' },
+    { label: 'KM', value: totalKm.toFixed(0)+'km', color: 'var(--text-2)' },
+  ].map((s, i) => (
+    <div key={i} className="glass-card" style={{ padding: '12px 8px', textAlign: 'center' }}>
+      <p style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--text-3)', marginBottom: '6px' }}>{s.label}</p>
+      <p style={{ fontFamily: 'var(--font-display)', fontSize: '16px', fontWeight: 800, color: s.color, letterSpacing: '-.02em' }}>{s.value}</p>
+    </div>
+  ))}
+</div>
+
 
       {showForm && (
         <div className="form-panel" style={{ marginBottom: '20px' }}>
