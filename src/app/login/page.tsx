@@ -13,15 +13,18 @@ export default function LoginPage() {
 
   async function handleSubmit(e: React.FormEvent) {
   e.preventDefault()
-  setLoading(true); setError('')
+  setLoading(true)
+  setError('')
   try {
     if (isLogin) {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: form.email,
         password: form.senha
       })
       if (error) throw error
-      window.location.href = '/dashboard'
+      if (data.session) {
+        window.location.replace('/dashboard')
+      }
     } else {
       const { error } = await supabase.auth.signUp({
         email: form.email,
@@ -37,6 +40,7 @@ export default function LoginPage() {
     setLoading(false)
   }
 }
+
 
 
   return (
