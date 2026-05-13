@@ -36,6 +36,8 @@ export default function ConfigPage() {
         preco_diesel: String(c.preco_diesel || ''),
         consumo_medio: String(c.consumo_medio || ''),
         custo_fixo_veiculo: String(c.custo_fixo_veiculo || '')
+        renda_fixa_mensal: String(c.renda_fixa_mensal || ''),
+
       })
     }
     load()
@@ -57,6 +59,7 @@ export default function ConfigPage() {
         preco_diesel: parseFloat(config.preco_diesel) || 0,
         consumo_medio: parseFloat(config.consumo_medio) || 0,
         custo_fixo_veiculo: parseFloat(config.custo_fixo_veiculo) || 0,
+        renda_fixa_mensal: parseFloat(config.renda_fixa_mensal) || 0,
       }).eq('user_id', user.id),
     ])
     setSaved(true)
