@@ -3,6 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import ThemeToggle from './ThemeToggle'
 
 const nav = [
   { href: '/dashboard',                icon: '◉', label: 'Dashboard'      },
@@ -71,7 +72,11 @@ export default function Sidebar({ userName }: { userName: string }) {
         })}
       </nav>
 
-      <div style={{ padding: '12px 10px', borderTop: '1px solid var(--border)' }}>
+           <div style={{ padding: '12px 10px', borderTop: '1px solid var(--border)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 13px', marginBottom: '4px' }}>
+          <span style={{ fontSize: '13px', color: 'var(--text-3)', fontWeight: 500 }}>Tema</span>
+          <ThemeToggle />
+        </div>
         <button onClick={signOut}
           className="nav-link"
           style={{ width: '100%', color: 'var(--danger)', background: 'none', border: 'none' }}>
