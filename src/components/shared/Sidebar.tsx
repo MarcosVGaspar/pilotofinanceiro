@@ -6,14 +6,17 @@ import { createClient } from '@/lib/supabase/client'
 import ThemeToggle from './ThemeToggle'
 
 const nav = [
-  { href: '/dashboard',                icon: '◉', label: 'Dashboard'      },
+  { href: '/dashboard',                icon: '◉',  label: 'Dashboard'      },
   { href: '/dashboard/corridas',       icon: '🚗', label: 'Corridas'       },
   { href: '/dashboard/rendas',         icon: '💰', label: 'Rendas'         },
   { href: '/dashboard/despesas',       icon: '💳', label: 'Despesas'       },
+  { href: '/dashboard/meta',           icon: '🎯', label: 'Meta Diária'    },
   { href: '/dashboard/veiculo',        icon: '⛽', label: 'Veículo'        },
   { href: '/dashboard/fluxo',          icon: '📊', label: 'Fluxo de Caixa' },
+  { href: '/dashboard/tutorial',       icon: '📖', label: 'Tutorial'       },
   { href: '/dashboard/configuracoes',  icon: '⚙️', label: 'Configurações'  },
 ]
+
 
 export default function Sidebar({ userName }: { userName: string }) {
   const pathname = usePathname()
