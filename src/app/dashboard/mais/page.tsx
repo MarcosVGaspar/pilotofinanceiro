@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 const items = [
+  { href: '/dashboard/tutorial',      icon: '📖', label: 'Tutorial',       sub: 'Como usar o PilotoFinanceiro' },
   { href: '/dashboard/rendas',        icon: '💰', label: 'Rendas',        sub: 'Salários e receitas extras' },
   { href: '/dashboard/veiculo',       icon: '⛽', label: 'Veículo',        sub: 'Abastecimentos e manutenções' },
   { href: '/dashboard/fluxo',         icon: '📊', label: 'Fluxo de Caixa', sub: 'Extrato e calendário' },
