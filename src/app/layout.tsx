@@ -43,12 +43,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR" className={`${syne.variable} ${dmSans.variable}`}>
-      <body
-        className="antialiased"
-        style={{ fontFamily: 'var(--font-dm, DM Sans), system-ui, sans-serif' }}
-      >
-        {children}
-      </body>
+      <body className="antialiased" style={{ fontFamily: 'var(--font-dm, DM Sans), system-ui, sans-serif' }}>
+  {children}
+  <script src="/register-sw.js" />
+</body>
+
     </html>
   )
 }
