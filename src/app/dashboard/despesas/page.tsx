@@ -55,7 +55,8 @@ export default function DespesasPage() {
     }
     setShowForm(false)
     setEditing(null)
-    setForm({ categoria: '', descricao: '', valor: '', data: toDateStr(new Date()), tipo: 'variavel', forma_pagamento: 'pix' })
+    setForm({ categoria: '', descricao: '', valor: '', data: toDateStr(new Date()), tipo: 'variavel', forma_pagamento: 'pix', operacional: false })
+
     load()
   }
 
