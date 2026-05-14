@@ -1,15 +1,16 @@
 import React from 'react'
 import Sidebar from '@/components/shared/Sidebar'
 import BottomNav from '@/components/shared/BottomNav'
-import ThemeProvider from '@/components/shared/ThemeProvider'
+import ThemeInitializer from '@/components/shared/ThemeInitializer'
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  return (
-    <ThemeProvider>
+    return (
+    <>
+    <ThemeInitializer />
       <div style={{ display: 'flex', minHeight: '100vh' }}>
         <Sidebar userName="Piloto" />
         <main className="main-content" style={{
@@ -30,6 +31,6 @@ export default function DashboardLayout({
         </main>
         <BottomNav />
       </div>
-    </ThemeProvider>
+        </>
   )
 }
