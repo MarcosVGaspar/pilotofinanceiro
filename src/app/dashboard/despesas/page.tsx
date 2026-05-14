@@ -149,6 +149,21 @@ export default function DespesasPage() {
               </select>
             </div>
           </div>
+<div style={{ gridColumn: 'span 2' }}>
+  <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', padding: '12px 16px', borderRadius: '8px', background: 'rgba(255,255,255,.03)', border: '1px solid rgba(255,255,255,.1)' }}>
+    <input
+      type="checkbox"
+      checked={form.operacional}
+      onChange={e => setForm({ ...form, operacional: e.target.checked })}
+      style={{ width: '18px', height: '18px', accentColor: 'var(--accent)', cursor: 'pointer' }}
+    />
+    <div>
+      <p style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-1)' }}>⚙️ Despesa Operacional</p>
+      <p style={{ fontSize: '11px', color: 'var(--text-3)', marginTop: '2px' }}>Deduz do lucro líquido (combustível, manutenção, etc.)</p>
+    </div>
+  </label>
+</div>
+
           <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', marginTop: '16px' }}>
             <button className="btn-secondary" onClick={() => { setShowForm(false); setEditing(null) }}>Cancelar</button>
             <button className="btn-primary" onClick={save}>Salvar</button>
