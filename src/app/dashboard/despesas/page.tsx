@@ -28,7 +28,7 @@ export default function DespesasPage() {
   const [editing, setEditing] = useState<any>(null)
   const [form, setForm] = useState({
     categoria: '', descricao: '', valor: '',
-    data: toDateStr(new Date()), tipo: 'variavel', forma_pagamento: 'pix'
+    data: toDateStr(new Date()), tipo: 'variavel', forma_pagamento: 'pix', operacional: false
   })
 
   const load = useCallback(async () => {
