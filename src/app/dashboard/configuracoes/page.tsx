@@ -13,8 +13,10 @@ export default function ConfigPage() {
   const [config, setConfig] = useState({
   preco_gasolina: '', preco_etanol: '',
   preco_diesel: '', consumo_medio: '',
-  custo_fixo_veiculo: '', renda_fixa_mensal: ''
+  custo_fixo_veiculo: '', renda_fixa_mensal: '',
+  accent_color: '#00FF87'
 })
+
 
 
   useEffect(() => {
