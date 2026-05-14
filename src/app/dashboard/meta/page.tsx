@@ -17,6 +17,13 @@ export default function MetaPage() {
   const [diasRestantes, setDiasRestantes] = useState(0)
   const [faltaMes, setFaltaMes] = useState(0)
   const [dias, setDias] = useState<any[]>([])
+  const [modoBruto, setModoBruto] = useState(true)
+  const [totalOperacional, setTotalOperacional] = useState(0)
+  const [metaLiquida, setMetaLiquida] = useState(0)
+  const [margemHistorica, setMargemHistorica] = useState(0)
+  const [metaBrutaSugerida, setMetaBrutaSugerida] = useState(0)
+  const [periodoMargem, setPeriodoMargem] = useState(3)
+
 
   useEffect(() => {
     async function load() {
@@ -30,11 +37,43 @@ export default function MetaPage() {
       const diasNoMes = new Date(ano, mes, 0).getDate()
       const diaAtual = now.getDate()
 
-      const [{ data: config }, { data: profile }, { data: corridas }] = await Promise.all([
-  supabase.from('configuracoes').select('*').eq('user_id', user.id).single(),
-  supabase.from('profiles').select('*').eq('id', user.id).single(),
-  supabase.from('corridas').select('data,valor').eq('user_id', user.id).gte('data', `${ym}-01`),
-])
+            const [{ data: config }, { data: profile }, { data: corridas }] = await Promise.all([
+        supabase.from('configuracoes').select('*').eq('user_id', user.id).single(),
+        supabase.from('profiles').select('*').eq('id', user.id).single(),
+        supabase.from('corridas').select('data,valor').eq('user_id', user.id).gte('data', `${ym}-01`),
+      ])
+
+      const metaLiq = Number(config?.meta_liquida || 0)
+      const periodo = Number(config?.periodo_margem || 3)
+      const catsOp = config?.categorias_operacionais || ['combustivel','manutencao_veiculo','seguro','impostos']
+
+      const dataInicio = new Date()
+      dataInicio.setMonth(dataInicio.getMonth() - periodo)
+      const dataInicioStr = dataInicio.getFullYear() + '-' + String(dataInicio.getMonth() + 1).padStart(2, '0') + '-01'
+
+      const [{ data: histCorridas }, { data: histDespesas }, { data: histAbast }, { data: histManut }] = await Promise.all([
+        supabase.from('corridas').select('valor').eq('user_id', user.id).gte('data', dataInicioStr),
+        supabase.from('despesas').select('valor,categoria,operacional').eq('user_id', user.id).gte('data', dataInicioStr),
+        supabase.from('abastecimentos').select('valor_total').eq('user_id', user.id).gte('data', dataInicioStr),
+        supabase.from('manutencoes').select('valor').eq('user_id', user.id).gte('data', dataInicioStr),
+      ])
+
+      const totalBrutoHist = (histCorridas || []).reduce((a: number, x: any) => a + Number(x.valor), 0)
+      const totalOpHist =
+        (histDespesas || []).filter((x: any) => x.operacional || catsOp.includes(x.categoria)).reduce((a: number, x: any) => a + Number(x.valor), 0) +
+        (histAbast || []).reduce((a: number, x: any) => a + Number(x.valor_total || 0), 0) +
+        (histManut || []).reduce((a: number, x: any) => a + Number(x.valor || 0), 0)
+
+      const margem = totalBrutoHist > 0 ? (totalBrutoHist - totalOpHist) / totalBrutoHist : 0.8
+      const brutaSugerida = metaLiq > 0 && margem > 0 ? metaLiq / margem : 0
+      const totalOpMes = totalOpHist / periodo
+
+      setMetaLiquida(metaLiq)
+      setMargemHistorica(margem * 100)
+      setMetaBrutaSugerida(brutaSugerida)
+      setPeriodoMargem(periodo)
+      setTotalOperacional(totalOpMes)
+
 
      const metaMensal = Number(profile?.meta_mensal || 0)
      const rendaF = Number(config?.renda_fixa_mensal || 0)
@@ -143,6 +182,42 @@ export default function MetaPage() {
           <p style={{ fontSize: '11px', color: 'var(--text-3)' }}>Meta: {fmt$(meta - rendaFixa)}</p>
         </div>
       </div>
+
+            {/* Bruto vs Líquido */}
+      {metaLiquida > 0 && (
+        <div className="glass-card" style={{ padding: '16px', marginBottom: '16px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '13px', fontWeight: 700, color: 'var(--text-1)' }}>
+              Bruto vs Líquido
+            </p>
+            <div style={{ display: 'flex', gap: '6px' }}>
+              <button onClick={() => setModoBruto(true)} style={{ padding: '4px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: 700, cursor: 'pointer', border: '1px solid', background: modoBruto ? 'rgba(0,255,135,.1)' : 'transparent', borderColor: modoBruto ? 'rgba(0,255,135,.3)' : 'rgba(255,255,255,.1)', color: modoBruto ? 'var(--accent)' : 'var(--text-3)' }}>Bruto</button>
+              <button onClick={() => setModoBruto(false)} style={{ padding: '4px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: 700, cursor: 'pointer', border: '1px solid', background: !modoBruto ? 'rgba(0,230,118,.1)' : 'transparent', borderColor: !modoBruto ? 'rgba(0,230,118,.3)' : 'rgba(255,255,255,.1)', color: !modoBruto ? 'var(--success)' : 'var(--text-3)' }}>Líquido</button>
+            </div>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '12px' }}>
+            <div style={{ padding: '10px', borderRadius: '8px', background: 'rgba(255,255,255,.03)', border: '1px solid rgba(255,255,255,.06)' }}>
+              <p style={{ fontSize: '10px', color: 'var(--text-3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: '4px' }}>Meta Líquida</p>
+              <p style={{ fontFamily: 'var(--font-display)', fontSize: '16px', fontWeight: 800, color: 'var(--success)' }}>{fmt$(metaLiquida)}</p>
+            </div>
+            <div style={{ padding: '10px', borderRadius: '8px', background: 'rgba(255,255,255,.03)', border: '1px solid rgba(255,255,255,.06)' }}>
+              <p style={{ fontSize: '10px', color: 'var(--text-3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: '4px' }}>Meta Bruta Sugerida</p>
+              <p style={{ fontFamily: 'var(--font-display)', fontSize: '16px', fontWeight: 800, color: 'var(--accent)' }}>{fmt$(metaBrutaSugerida)}</p>
+            </div>
+          </div>
+          <div style={{ padding: '10px 12px', borderRadius: '8px', background: 'rgba(0,212,255,.05)', border: '1px solid rgba(0,212,255,.15)' }}>
+            <p style={{ fontSize: '12px', color: 'var(--cyan)', lineHeight: 1.5 }}>
+              {'📊 Margem histórica (' + periodoMargem + (periodoMargem === 1 ? ' mês' : ' meses') + '): '}
+              <strong>{margemHistorica.toFixed(1)}%</strong>
+              {metaBrutaSugerida > 0 && (
+                <span style={{ display: 'block', marginTop: '4px' }}>
+                  {'Para lucrar ' + fmt$(metaLiquida) + ', você precisa faturar ' + fmt$(metaBrutaSugerida)}
+                </span>
+              )}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Calendário */}
       <div className="glass-card" style={{ padding: '16px' }}>
