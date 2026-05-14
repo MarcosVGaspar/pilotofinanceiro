@@ -68,7 +68,8 @@ export default function DespesasPage() {
 
   function edit(d: any) {
     setEditing(d)
-    setForm({ categoria: d.categoria, descricao: d.descricao, valor: String(d.valor), data: d.data, tipo: d.tipo, forma_pagamento: d.forma_pagamento || 'pix' })
+    setForm({ categoria: d.categoria, descricao: d.descricao, valor: String(d.valor), data: d.data, tipo: d.tipo, forma_pagamento: d.forma_pagamento || 'pix', operacional: d.operacional || false })
+
     setShowForm(true)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
