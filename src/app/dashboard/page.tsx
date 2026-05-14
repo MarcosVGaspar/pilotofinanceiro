@@ -30,21 +30,28 @@ export default function DashboardPage() {
       const now = new Date()
       const ym = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0')
 
-      const [c, r, d, p] = await Promise.all([
-        supabase.from('corridas').select('*').eq('user_id', user.id).gte('data', ym + '-01'),
-        supabase.from('rendas').select('*').eq('user_id', user.id).gte('data', ym + '-01'),
-        supabase.from('despesas').select('*').eq('user_id', user.id).gte('data', ym + '-01'),
-        supabase.from('profiles').select('*').eq('id', user.id).single(),
-      ])
+      const [c, r, d, p, ab, mn] = await Promise.all([
+  supabase.from('corridas').select('*').eq('user_id', user.id).gte('data', ym + '-01'),
+  supabase.from('rendas').select('*').eq('user_id', user.id).gte('data', ym + '-01'),
+  supabase.from('despesas').select('*').eq('user_id', user.id).gte('data', ym + '-01'),
+  supabase.from('profiles').select('*').eq('id', user.id).single(),
+  supabase.from('abastecimentos').select('*').eq('user_id', user.id).gte('data', ym + '-01'),
+  supabase.from('manutencoes').select('*').eq('user_id', user.id).gte('data', ym + '-01'),
+])
+
 
       const corridas = c.data || []
-      const rendas = r.data || []
-      const despesas = d.data || []
-      const profile = p.data
+const rendas = r.data || []
+const despesas = d.data || []
+const profile = p.data
+const abastecimentos = ab.data || []
+const manutencoes = mn.data || []
 
       const tc = corridas.reduce((a: number, x: any) => a + Number(x.valor), 0)
       const tr = rendas.reduce((a: number, x: any) => a + Number(x.valor), 0)
       const td = despesas.reduce((a: number, x: any) => a + Number(x.valor), 0)
+  + abastecimentos.reduce((a: number, x: any) => a + Number(x.valor_total || 0), 0)
+  + manutencoes.reduce((a: number, x: any) => a + Number(x.valor || 0), 0)
       const qc = corridas.reduce((a: number, x: any) => a + (x.quantidade_corridas || 1), 0)
       const m = Number(profile?.meta_mensal || 0)
       const s = tc + tr - td
