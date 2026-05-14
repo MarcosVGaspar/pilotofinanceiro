@@ -39,6 +39,7 @@ export default function ConfigPage() {
         consumo_medio: String(c.consumo_medio || ''),
         custo_fixo_veiculo: String(c.custo_fixo_veiculo || ''),
         renda_fixa_mensal: String(c.renda_fixa_mensal || ''),
+        accent_color: c.accent_color || '#00FF87',
 
       })
     }
@@ -48,6 +49,7 @@ export default function ConfigPage() {
   async function saveAll() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return
+accent_color: config.accent_color,
 
   const rendaFixa = parseFloat(config.renda_fixa_mensal) || 0
 
@@ -207,6 +209,41 @@ export default function ConfigPage() {
   </div>
 </div>
 
+      <div style={S.card}>
+  <p style={{ fontFamily: 'var(--font-display)', fontSize: '14px', fontWeight: 700, color: 'var(--text-1)', marginBottom: '16px' }}>
+    🎨 Cor de Destaque
+  </p>
+  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '10px' }}>
+    {[
+      { color: '#00FF87', label: 'Verde'  },
+      { color: '#00D4FF', label: 'Ciano'  },
+      { color: '#FF4757', label: 'Coral'  },
+      { color: '#FFB800', label: 'Âmbar'  },
+      { color: '#A855F7', label: 'Roxo'   },
+      { color: '#FF69B4', label: 'Rosa'   },
+    ].map(({ color, label }) => (
+      <button key={color}
+        onClick={() => {
+          setConfig({ ...config, accent_color: color })
+          document.documentElement.style.setProperty('--accent', color)
+        }}
+        style={{
+          width: '100%', aspectRatio: '1', borderRadius: '50%',
+          background: color, border: 'none', cursor: 'pointer',
+          boxShadow: config.accent_color === color
+            ? `0 0 0 3px var(--bg-card), 0 0 0 5px ${color}`
+            : 'none',
+          transform: config.accent_color === color ? 'scale(1.15)' : 'scale(1)',
+          transition: 'all .2s',
+        }}
+        title={label}
+      />
+    ))}
+  </div>
+  <p style={{ fontSize: '12px', color: 'var(--text-3)', marginTop: '12px', textAlign: 'center' }}>
+    A cor será aplicada em todo o app
+  </p>
+</div>
 
       <button className="btn-primary" onClick={saveAll}
         style={{ width: '100%', padding: '14px', fontSize: '15px', marginBottom: '12px' }}>
