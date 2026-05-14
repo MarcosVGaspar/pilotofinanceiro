@@ -2,6 +2,14 @@
 import { useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
+function hexToRgb(hex: string): string | null {
+  const r = parseInt(hex.slice(1, 3), 16)
+  const g = parseInt(hex.slice(3, 5), 16)
+  const b = parseInt(hex.slice(5, 7), 16)
+  if (isNaN(r) || isNaN(g) || isNaN(b)) return null
+  return `${r},${g},${b}`
+}
+
 export default function ThemeInitializer() {
   const supabase = createClient()
 
@@ -24,9 +32,13 @@ export default function ThemeInitializer() {
           document.documentElement.setAttribute('data-theme', data.tema)
           localStorage.setItem('pf-theme', data.tema)
         }
-        if (data?.accent_color) {
+                        if (data?.accent_color) {
           document.documentElement.style.setProperty('--accent', data.accent_color)
+          const rgb = hexToRgb(data.accent_color)
+          if (rgb) document.documentElement.style.setProperty('--accent-rgb', rgb)
         }
+
+
       } catch {}
     }
     init()
