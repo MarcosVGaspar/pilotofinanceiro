@@ -49,7 +49,6 @@ export default function ConfigPage() {
   async function saveAll() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return
-accent_color: config.accent_color,
 
   const rendaFixa = parseFloat(config.renda_fixa_mensal) || 0
 
@@ -67,6 +66,7 @@ accent_color: config.accent_color,
       consumo_medio: parseFloat(config.consumo_medio) || 0,
       custo_fixo_veiculo: parseFloat(config.custo_fixo_veiculo) || 0,
       renda_fixa_mensal: rendaFixa,
+      accent_color: config.accent_color,
     }).eq('user_id', user.id),
   ])
 
