@@ -21,6 +21,8 @@ export default function DashboardPage() {
   const [pct, setPct] = useState(0)
   const [chartData, setChartData] = useState<any[]>([])
   const [catTotals, setCatTotals] = useState<Record<string, number>>({})
+  const [modoBruto, setModoBruto] = useState(true)
+  const [totalOperacional, setTotalOperacional] = useState(0)
 
   useEffect(() => {
     async function load() {
@@ -56,10 +58,18 @@ const manutencoes = mn.data || []
       const m = Number(profile?.meta_mensal || 0)
       const s = tc + tr - td
 
+            const tOp = despesas
+        .filter((x: any) => x.operacional)
+        .reduce((a: number, x: any) => a + Number(x.valor), 0)
+        + abastecimentos.reduce((a: number, x: any) => a + Number(x.valor_total || 0), 0)
+        + manutencoes.reduce((a: number, x: any) => a + Number(x.valor || 0), 0)
+
       setTotalCorridas(tc)
       setTotalRendas(tr)
       setTotalDespesas(td)
+      setTotalOperacional(tOp)
       setQtdCorridas(qc)
+
       setMeta(m)
       setPct(m > 0 ? Math.min(((tc + tr) / m) * 100, 100) : 0)
       setSaldo(s)
@@ -111,11 +121,19 @@ const manutencoes = mn.data || []
 
   const now = new Date()
 
-  const kpis = [
-    { label: 'Total Corridas', value: fmt$(totalCorridas), color: 'var(--accent)',  icon: '🚗', sub: qtdCorridas + ' corridas' },
-    { label: 'Rendas Extras',  value: fmt$(totalRendas),   color: 'var(--success)', icon: '💰', sub: 'este mês' },
-    { label: 'Despesas',       value: fmt$(totalDespesas), color: 'var(--danger)',  icon: '💳', sub: 'este mês' },
-    { label: 'Ticket Médio',   value: fmt$(qtdCorridas > 0 ? totalCorridas / qtdCorridas : 0), color: 'var(--cyan)', icon: '🎯', sub: 'por corrida' },
+    const lucroLiquido = totalCorridas + totalRendas - totalOperacional
+  const saldoExibido = modoBruto ? saldo : lucroLiquido
+
+  const kpis = modoBruto ? [
+    { label: 'Total Corridas',  value: fmt$(totalCorridas), color: 'var(--accent)',  icon: '🚗', sub: qtdCorridas + ' corridas' },
+    { label: 'Rendas Extras',   value: fmt$(totalRendas),   color: 'var(--success)', icon: '💰', sub: 'este mês' },
+    { label: 'Despesas Totais', value: fmt$(totalDespesas), color: 'var(--danger)',  icon: '💳', sub: 'este mês' },
+    { label: 'Ticket Médio',    value: fmt$(qtdCorridas > 0 ? totalCorridas / qtdCorridas : 0), color: 'var(--cyan)', icon: '🎯', sub: 'por corrida' },
+  ] : [
+    { label: 'Faturamento',   value: fmt$(totalCorridas + totalRendas), color: 'var(--accent)',  icon: '🚗', sub: 'bruto total' },
+    { label: 'Custo Op.',     value: fmt$(totalOperacional),            color: 'var(--danger)',  icon: '⚙️', sub: 'operacional' },
+    { label: 'Lucro Líquido', value: fmt$(lucroLiquido),                color: lucroLiquido >= 0 ? 'var(--success)' : 'var(--danger)', icon: '💚', sub: 'no bolso' },
+    { label: 'Margem',        value: (totalCorridas + totalRendas) > 0 ? ((lucroLiquido / (totalCorridas + totalRendas)) * 100).toFixed(1) + '%' : '0%', color: 'var(--cyan)', icon: '📊', sub: 'de lucro' },
   ]
 
   return (
@@ -130,12 +148,21 @@ const manutencoes = mn.data || []
         <p style={{ fontSize: '14px', color: 'var(--text-2)', marginTop: '4px', marginBottom: '16px' }}>
           Aqui está o resumo das suas finanças
         </p>
+                <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+          <button onClick={() => setModoBruto(true)} style={{ flex: 1, padding: '8px', borderRadius: '8px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', border: '1px solid', transition: 'all .2s', background: modoBruto ? 'rgba(0,255,135,.1)' : 'transparent', borderColor: modoBruto ? 'rgba(0,255,135,.3)' : 'rgba(255,255,255,.1)', color: modoBruto ? 'var(--accent)' : 'var(--text-3)' }}>
+            📊 Bruto
+          </button>
+          <button onClick={() => setModoBruto(false)} style={{ flex: 1, padding: '8px', borderRadius: '8px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', border: '1px solid', transition: 'all .2s', background: !modoBruto ? 'rgba(0,230,118,.1)' : 'transparent', borderColor: !modoBruto ? 'rgba(0,230,118,.3)' : 'rgba(255,255,255,.1)', color: !modoBruto ? 'var(--success)' : 'var(--text-3)' }}>
+            💚 Líquido
+          </button>
+        </div>
         <div style={{ padding: '14px 16px', borderRadius: '12px', textAlign: 'center', background: isPositive ? 'rgba(0,255,135,.07)' : 'rgba(255,71,87,.07)', border: '1px solid ' + (isPositive ? 'rgba(0,255,135,.18)' : 'rgba(255,71,87,.18)') }}>
+
           <p style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.1em', color: 'var(--text-3)', marginBottom: '6px' }}>
             Saldo do Mês
           </p>
           <p style={{ fontFamily: 'var(--font-display)', fontSize: '32px', fontWeight: 800, color: isPositive ? 'var(--accent)' : 'var(--danger)', letterSpacing: '-.02em' }}>
-            {fmt$(saldo)}
+                    {fmt$(saldoExibido)}
           </p>
         </div>
       </div>
