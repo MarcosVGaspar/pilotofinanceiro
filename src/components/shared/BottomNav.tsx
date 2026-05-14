@@ -2,6 +2,8 @@
 import React from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import ThemeToggle from './ThemeToggle'
+
 
 const nav = [
   { href: '/dashboard',               icon: '◉', label: 'Início'   },
@@ -15,7 +17,10 @@ export default function BottomNav() {
   const pathname = usePathname()
 
   return (
-    <nav className="bottom-nav">
+       <nav className="bottom-nav">
+      <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '6px 16px 0', borderBottom: '1px solid var(--border)' }}>
+        <ThemeToggle />
+      </div>
       <div className="bnav-items">
         {nav.map(item => (
           <Link
