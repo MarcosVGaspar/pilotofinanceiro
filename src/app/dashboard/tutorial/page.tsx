@@ -3,20 +3,25 @@ import React, { useState } from 'react'
 import Link from 'next/link'
 
 const steps = [
-  {
+    {
     icon: '⚙️',
     title: 'Configure seu perfil',
     color: 'var(--cyan)',
     items: [
       'Acesse Mais → Configurações',
       'Preencha seu nome e cidade',
-      'Defina sua meta mensal (ex: R$ 5.000)',
+      'Defina sua meta mensal bruta (ex: R$ 5.000)',
+      'Defina sua meta líquida — o que quer ter no bolso (ex: R$ 3.500)',
       'Informe sua renda fixa mensal (salário, benefício)',
       'Configure os preços dos combustíveis da sua região',
+      'Defina o período de análise da margem histórica (ex: 3 meses)',
+      'Marque quais categorias são custos operacionais',
+      'Escolha a cor de destaque do app em Cor de Destaque',
       'Salve as configurações',
     ],
-    tip: '💡 A meta diária será calculada automaticamente descontando sua renda fixa.',
+    tip: '💡 Com a meta líquida configurada, o sistema calcula automaticamente quanto você precisa faturar em bruto para atingi-la.',
   },
+
   {
     icon: '🚗',
     title: 'Lançar corridas',
@@ -45,7 +50,7 @@ const steps = [
     ],
     tip: '💡 Rendas recorrentes aparecem separadas das avulsas para facilitar o controle.',
   },
-  {
+    {
     icon: '💳',
     title: 'Controlar despesas',
     color: 'var(--danger)',
@@ -56,9 +61,12 @@ const steps = [
       'Informe descrição, valor, data e forma de pagamento',
       'Para contas fixas, selecione Tipo → Fixa',
       'Para parcelas, selecione Tipo → Parcelada',
+      'Marque "Despesa Operacional" se for um custo do trabalho (combustível, manutenção, seguro...)',
+      'Despesas operacionais são deduzidas do seu lucro líquido',
     ],
-    tip: '💡 Categorize bem suas despesas para ver a distribuição no Dashboard.',
+    tip: '💡 Marcar corretamente as despesas operacionais garante que o cálculo de lucro líquido seja preciso.',
   },
+
   {
     icon: '⛽',
     title: 'Controlar o veículo',
@@ -73,7 +81,7 @@ const steps = [
     ],
     tip: '💡 O custo do veículo é incluído automaticamente no total de despesas do Dashboard.',
   },
-  {
+    {
     icon: '🎯',
     title: 'Acompanhar a meta diária',
     color: 'var(--accent)',
@@ -84,9 +92,13 @@ const steps = [
       'Dias verdes = meta atingida naquele dia',
       'Dias vermelhos = ficou abaixo da meta',
       'Quanto mais você supera, menor fica a meta dos dias seguintes',
+      'Use o botão Bruto/Líquido para alternar entre as visões',
+      'Na visão Líquido veja: meta líquida, meta bruta sugerida e margem histórica',
+      'A margem é calculada automaticamente com base no período configurado',
     ],
-    tip: '💡 Se você ganhou R$ 200 num dia cuja meta era R$ 100, os dias seguintes ficam mais fáceis!',
+    tip: '💡 A meta bruta sugerida é calculada com base na sua margem histórica. Se sua margem é 80%, para lucrar R$ 3.000 você precisa faturar R$ 3.750.',
   },
+
   {
     icon: '📊',
     title: 'Fluxo de caixa',
@@ -101,22 +113,38 @@ const steps = [
     ],
     tip: '💡 Use o fluxo de caixa para planejar os próximos meses.',
   },
-  {
+    {
     icon: '◉',
     title: 'Dashboard principal',
     color: 'var(--accent)',
     items: [
       'O Dashboard mostra um resumo do mês atual',
-      'Cards com total de corridas, rendas, despesas e ticket médio',
+      'Use o botão Bruto/Líquido para alternar a visão',
+      'Visão Bruta: total de corridas, rendas, despesas e ticket médio',
+      'Visão Líquida: faturamento, custo operacional, lucro líquido e margem',
       'Barra de progresso da meta mensal',
       'Gráfico comparando receitas vs despesas dos últimos 6 meses',
       'Gráfico de pizza com distribuição das despesas por categoria',
     ],
-    tip: '💡 Configure sua meta mensal nas Configurações para ver a barra de progresso.',
+    tip: '💡 A visão líquida mostra o que realmente sobra no seu bolso depois de descontar os custos operacionais do trabalho.',
+  },
+  {
+    icon: '🎨',
+    title: 'Personalizar o tema',
+    color: '#A855F7',
+    items: [
+      'Acesse Mais → Configurações',
+      'Role até a seção Cor de Destaque',
+      'Escolha entre 6 cores: Verde, Ciano, Coral, Âmbar, Roxo ou Rosa',
+      'A cor é aplicada instantaneamente em todo o app',
+      'Salve as configurações para manter a cor escolhida',
+    ],
+    tip: '💡 A cor escolhida é salva na sua conta e aparece em qualquer dispositivo que você usar.',
   },
 ]
 
 export default function TutorialPage() {
+
   const [openStep, setOpenStep] = useState<number | null>(0)
 
   return (
