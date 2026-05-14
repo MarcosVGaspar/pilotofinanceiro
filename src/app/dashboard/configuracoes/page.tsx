@@ -223,10 +223,15 @@ export default function ConfigPage() {
       { color: '#FF69B4', label: 'Rosa'   },
     ].map(({ color, label }) => (
       <button key={color}
-        onClick={() => {
+                onClick={() => {
           setConfig({ ...config, accent_color: color })
           document.documentElement.style.setProperty('--accent', color)
+          const r = parseInt(color.slice(1,3),16)
+          const g = parseInt(color.slice(3,5),16)
+          const b = parseInt(color.slice(5,7),16)
+          document.documentElement.style.setProperty('--accent-rgb', `${r},${g},${b}`)
         }}
+
         style={{
           width: '100%', aspectRatio: '1', borderRadius: '50%',
           background: color, border: 'none', cursor: 'pointer',
