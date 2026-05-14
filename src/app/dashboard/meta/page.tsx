@@ -30,16 +30,15 @@ export default function MetaPage() {
       const diasNoMes = new Date(ano, mes, 0).getDate()
       const diaAtual = now.getDate()
 
-      const [{ data: config }, { data: corridas }] = await Promise.all([
-        supabase.from('configuracoes').select('*').eq('user_id', user.id).single(),
-        supabase.from('corridas').select('data,valor').eq('user_id', user.id).gte('data', `${ym}-01`),
-      ])
+      const [{ data: config }, { data: profile }, { data: corridas }] = await Promise.all([
+  supabase.from('configuracoes').select('*').eq('user_id', user.id).single(),
+  supabase.from('profiles').select('*').eq('id', user.id).single(),
+  supabase.from('corridas').select('data,valor').eq('user_id', user.id).gte('data', `${ym}-01`),
+])
 
-      const metaMensal = Number(config?.meta_mensal || profile?.meta_mensal || 0)
+const metaMensal = Number(profile?.meta_mensal || 0)
 const rendaF = Number(config?.renda_fixa_mensal || 0)
-      const rendaF = Number(config?.renda_fixa_mensal || 0)
-      const metaCorridasMes = rendaF > 0 ? metaMensal - rendaF : metaMensal
-      const metaDiariaBase = metaCorridasMes > 0 ? metaCorridasMes / diasNoMes : 0
+
 
       // Total ganho até hoje
       const totalGanho = (corridas || []).reduce((a: number, c: any) => a + Number(c.valor), 0)
