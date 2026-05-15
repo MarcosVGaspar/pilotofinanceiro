@@ -111,15 +111,15 @@ export default function DashboardPage() {
   )
 
   const now = new Date()
-  const faturamentoBruto = totalCorridas + totalRendas
+    const faturamentoBruto = totalCorridas + totalRendas
   const lucroLiquido     = faturamentoBruto - totalOperacional
 
-  // Saldo e meta dependem do modo
-  const saldoExibido = modoBruto ? faturamentoBruto - totalDespesas : lucroLiquido
-  const metaExibida  = modoBruto ? metaBruta : metaLiquida
+  // Bruto = tudo que entrou | Líquido = tudo que entrou menos operacional
   const progressoExibido = modoBruto ? faturamentoBruto : lucroLiquido
-  const pct = metaExibida > 0 ? Math.min((progressoExibido / metaExibida) * 100, 100) : 0
-  const isPositive = saldoExibido >= 0
+  const saldoExibido     = modoBruto ? faturamentoBruto - totalDespesas : lucroLiquido
+  const metaExibida      = modoBruto ? metaBruta : metaLiquida
+  const pct              = metaExibida > 0 ? Math.min((progressoExibido / metaExibida) * 100, 100) : 0
+  const isPositive       = saldoExibido >= 0
 
   const kpis = modoBruto ? [
     { label: 'Total Corridas',  value: fmt$(totalCorridas), color: 'var(--accent)',  icon: '🚗', sub: qtdCorridas + ' corridas' },
