@@ -197,8 +197,11 @@ export default function ConfigPage() {
       {/* META BRUTA vs LÍQUIDA */}
       <div style={{ ...card, border: '1px solid rgba(var(--accent-rgb),.2)', background: 'linear-gradient(135deg, rgba(var(--accent-rgb),.04) 0%, rgba(13,18,32,.95) 100%)' }}>
         <p style={sectionTitle}>🎯 Meta Mensal</p>
-        <p style={{ fontSize: '12px', color: 'var(--text-3)', marginBottom: '14px', lineHeight: 1.5 }}>
-          Defina quanto quer <strong style={{ color: 'var(--text-2)' }}>lucrar líquido</strong> por mês. O app calcula automaticamente a meta bruta necessária considerando seus custos.
+              <p style={{ fontSize: '12px', color: 'var(--text-3)', marginBottom: '14px', lineHeight: 1.5 }}>
+          <strong style={{ color: 'var(--text-2)' }}>Meta Bruta</strong> = tudo que entra (corridas + renda extra).<br/>
+          <strong style={{ color: 'var(--text-2)' }}>Meta Líquida</strong> = bruto menos custos operacionais (gasolina, manutenção, etc.)
+        </p>
+
         </p>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
