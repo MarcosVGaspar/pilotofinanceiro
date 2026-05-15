@@ -86,15 +86,15 @@ export default function FluxoPage() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '12px', marginBottom: '20px' }}>
+           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0,1fr))', gap: '8px', marginBottom: '16px' }}>
         {[
           { label: 'Entradas', value: fmt$(totalIn),  color: 'var(--accent)'  },
           { label: 'Saídas',   value: fmt$(totalOut), color: 'var(--danger)'  },
           { label: 'Saldo',    value: fmt$(saldo),    color: saldo >= 0 ? 'var(--accent)' : 'var(--danger)' },
         ].map((s, i) => (
-          <div key={i} className="glass-card kpi-card">
-            <p className="kpi-label">{s.label}</p>
-            <p className="kpi-value" style={{ color: s.color, fontSize: '20px' }}>{s.value}</p>
+          <div key={i} className="glass-card" style={{ padding: '12px 8px', textAlign: 'center', overflow: 'hidden' }}>
+            <p style={{ fontSize: '9px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.05em', color: 'var(--text-3)', marginBottom: '5px' }}>{s.label}</p>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '13px', fontWeight: 800, color: s.color, letterSpacing: '-.02em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.value}</p>
           </div>
         ))}
       </div>
@@ -108,7 +108,7 @@ export default function FluxoPage() {
             <XAxis dataKey="dia" stroke="transparent" tick={{ fill: '#4A5A7A', fontSize: 11 }} tickLine={false} axisLine={false} tickCount={8} />
             <YAxis stroke="transparent" tick={{ fill: '#4A5A7A', fontSize: 11 }} tickLine={false} axisLine={false} tickFormatter={v => `R$${(v / 1000).toFixed(0)}k`} />
             <Tooltip contentStyle={TT.contentStyle} formatter={(v: number) => fmt$(v)} />
-            <Line type="monotone" dataKey="saldo" stroke="#00FF87" strokeWidth={2} dot={false} />
+                    <Line type="monotone" dataKey="saldo" stroke="var(--accent)" strokeWidth={2} dot={false} />
           </LineChart>
         </ResponsiveContainer>
       </div>
