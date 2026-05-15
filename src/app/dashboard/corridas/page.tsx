@@ -105,18 +105,19 @@ export default function CorridasPage() {
         </button>
       </div>
 
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '20px' }}>
+  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '8px', marginBottom: '16px' }}>
   {[
-    { label: 'Faturado', value: fmt$(totalV), color: 'var(--accent)' },
-    { label: 'Corridas', value: String(totalQ), color: 'var(--text-1)' },
-    { label: 'KM', value: totalKm.toFixed(0)+'km', color: 'var(--text-2)' },
+    { label: 'Faturado', value: fmt$(totalV),            color: 'var(--accent)'  },
+    { label: 'Corridas', value: String(totalQ),           color: 'var(--text-1)' },
+    { label: 'KM',       value: totalKm.toFixed(0)+'km', color: 'var(--text-2)' },
   ].map((s, i) => (
-    <div key={i} className="glass-card" style={{ padding: '12px 8px', textAlign: 'center' }}>
-      <p style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--text-3)', marginBottom: '6px' }}>{s.label}</p>
-      <p style={{ fontFamily: 'var(--font-display)', fontSize: '16px', fontWeight: 800, color: s.color, letterSpacing: '-.02em' }}>{s.value}</p>
+    <div key={i} className="glass-card" style={{ padding: '12px 6px', textAlign: 'center', overflow: 'hidden' }}>
+      <p style={{ fontSize: '9px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.05em', color: 'var(--text-3)', marginBottom: '5px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.label}</p>
+      <p style={{ fontFamily: 'var(--font-display)', fontSize: '15px', fontWeight: 800, color: s.color, letterSpacing: '-.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.value}</p>
     </div>
   ))}
 </div>
+
 
 
       {showForm && (
@@ -133,14 +134,21 @@ export default function CorridasPage() {
               </button>
             ))}
           </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', width: '100%' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)', gap: '10px' }}>
             <div><label style={labelStyle}>Data</label><input type="date" style={inputStyle} value={form.data} onChange={e => setForm({ ...form, data: e.target.value })} /></div>
-            <div><label style={labelStyle}>Qtd corridas</label><input type="number" min="1" style={inputStyle} value={form.quantidade_corridas} onChange={e => setForm({ ...form, quantidade_corridas: e.target.value })} /></div>
+            <div><label style={labelStyle}>Qtd</label><input type="number" min="1" style={inputStyle} value={form.quantidade_corridas} onChange={e => setForm({ ...form, quantidade_corridas: e.target.value })} /></div>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)', gap: '10px' }}>
             <div><label style={labelStyle}>Valor (R$)</label><input type="number" step="0.01" style={inputStyle} value={form.valor} onChange={e => setForm({ ...form, valor: e.target.value })} /></div>
             <div><label style={labelStyle}>KM rodados</label><input type="number" step="0.1" style={inputStyle} value={form.km_rodados} onChange={e => setForm({ ...form, km_rodados: e.target.value })} /></div>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)', gap: '10px' }}>
             <div><label style={labelStyle}>Hora início</label><input type="time" style={inputStyle} value={form.hora_inicio} onChange={e => setForm({ ...form, hora_inicio: e.target.value })} /></div>
             <div><label style={labelStyle}>Hora fim</label><input type="time" style={inputStyle} value={form.hora_fim} onChange={e => setForm({ ...form, hora_fim: e.target.value })} /></div>
           </div>
+        </div>
+
           <div style={{ marginTop: '12px' }}>
             <label style={labelStyle}>Observações</label>
             <textarea rows={2} style={{ ...inputStyle, resize: 'vertical' as const }} value={form.observacoes} onChange={e => setForm({ ...form, observacoes: e.target.value })} />
