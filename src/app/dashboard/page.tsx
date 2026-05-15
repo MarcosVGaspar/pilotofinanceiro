@@ -78,10 +78,12 @@ export default function DashboardPage() {
         const dt = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1)
         return dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0')
       })
-      const [a1, a2, a3] = await Promise.all([
+            const [a1, a2, a3, a4, a5] = await Promise.all([
         supabase.from('corridas').select('data,valor').eq('user_id', user.id).gte('data', months6[0] + '-01'),
         supabase.from('rendas').select('data,valor').eq('user_id', user.id).gte('data', months6[0] + '-01'),
         supabase.from('despesas').select('data,valor,categoria').eq('user_id', user.id).gte('data', months6[0] + '-01'),
+        supabase.from('abastecimentos').select('data,valor_total').eq('user_id', user.id).gte('data', months6[0] + '-01'),
+        supabase.from('manutencoes').select('data,valor').eq('user_id', user.id).gte('data', months6[0] + '-01'),
       ])
       const cd = months6.map(mo => ({
         mes: mo.slice(5, 7) + '/' + mo.slice(2, 4),
@@ -89,8 +91,11 @@ export default function DashboardPage() {
           (a1.data || []).filter((x: any) => x.data?.startsWith(mo)).reduce((a: number, x: any) => a + Number(x.valor), 0) +
           (a2.data || []).filter((x: any) => x.data?.startsWith(mo)).reduce((a: number, x: any) => a + Number(x.valor), 0),
         despesas:
-          (a3.data || []).filter((x: any) => x.data?.startsWith(mo)).reduce((a: number, x: any) => a + Number(x.valor), 0),
+          (a3.data || []).filter((x: any) => x.data?.startsWith(mo)).reduce((a: number, x: any) => a + Number(x.valor), 0) +
+          (a4.data || []).filter((x: any) => x.data?.startsWith(mo)).reduce((a: number, x: any) => a + Number(x.valor_total || 0), 0) +
+          (a5.data || []).filter((x: any) => x.data?.startsWith(mo)).reduce((a: number, x: any) => a + Number(x.valor || 0), 0),
       }))
+
       const ct: Record<string, number> = {}
       despesas.forEach((x: any) => { ct[x.categoria] = (ct[x.categoria] || 0) + Number(x.valor) })
 
@@ -111,12 +116,14 @@ export default function DashboardPage() {
   )
 
   const now = new Date()
-    const faturamentoBruto = totalCorridas + totalRendas
+      const faturamentoBruto = totalCorridas + totalRendas
+  // Saldo bruto = tudo que entrou menos tudo que saiu
+  const saldoBruto       = faturamentoBruto - totalDespesas
+  // Saldo líquido = tudo que entrou menos só os custos operacionais
   const lucroLiquido     = faturamentoBruto - totalOperacional
 
-  // Bruto = tudo que entrou | Líquido = tudo que entrou menos operacional
   const progressoExibido = modoBruto ? faturamentoBruto : lucroLiquido
-  const saldoExibido     = modoBruto ? faturamentoBruto - totalDespesas : lucroLiquido
+  const saldoExibido     = modoBruto ? saldoBruto : lucroLiquido
   const metaExibida      = modoBruto ? metaBruta : metaLiquida
   const pct              = metaExibida > 0 ? Math.min((progressoExibido / metaExibida) * 100, 100) : 0
   const isPositive       = saldoExibido >= 0
