@@ -61,12 +61,12 @@ export default function DashboardCharts({
               axisLine={false} tickLine={false}
               tickFormatter={v => `${(v/1000).toFixed(0)}k`} />
             <Tooltip {...TT} formatter={(v:number) => fmt$(v)} />
-            <Bar dataKey="receitas" name="Receitas" fill="#00FF87" radius={[6,6,0,0]} opacity={.85}/>
+                        <Bar dataKey="receitas" name="Receitas" fill="var(--accent)" radius={[6,6,0,0]} opacity={.85}/>
             <Bar dataKey="despesas" name="Despesas" fill="#FF4757" radius={[6,6,0,0]} opacity={.85}/>
           </BarChart>
         </ResponsiveContainer>
         <div style={{ display:'flex', gap:'16px', marginTop:'8px', justifyContent:'center' }}>
-          {[['Receitas','#00FF87'],['Despesas','#FF4757']].map(([l,c]) => (
+                 {[['Receitas','var(--accent)'],['Despesas','#FF4757']].map(([l,c]) => (
             <div key={l} style={{ display:'flex', alignItems:'center', gap:'6px' }}>
               <div style={{ width:10, height:10, borderRadius:3, background:c }} />
               <span style={{ fontSize:'11px', color:'var(--text-3)', fontWeight:600 }}>{l}</span>
