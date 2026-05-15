@@ -62,9 +62,9 @@ export default function DashboardPage() {
         + manutencoes.reduce((a: number, x: any) => a + Number(x.valor || 0), 0)
 
       // Meta: usa meta_bruta_sugerida do config, fallback para meta_mensal do profile
-      const mBruta  = Number(config?.meta_bruta_sugerida || profile?.meta_mensal || 0)
+            const mBruta  = Number(config?.meta_bruta_sugerida || config?.meta_mensal || profile?.meta_mensal || 0)
       const mLiq    = Number(config?.meta_liquida || 0)
-
+      console.log('DEBUG meta:', { mBruta, mLiq, config })
       setTotalCorridas(tc)
       setTotalRendas(tr)
       setTotalDespesas(td)
