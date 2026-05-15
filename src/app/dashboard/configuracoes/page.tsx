@@ -205,8 +205,9 @@ export default function ConfigPage() {
         </p>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          <div>
-            <label style={lbl}>Meta líquida (R$) — o que quer no bolso</label>
+                  <div>
+            <label style={lbl}>Meta bruta (R$) — total que quer receber no mês</label>
+
             <input type="number" step="0.01" style={inp}
               value={config.meta_liquida}
               placeholder="Ex: 3000,00"
@@ -233,8 +234,8 @@ export default function ConfigPage() {
             </div>
           )}
 
-          <div>
-            <label style={lbl}>Meta bruta (R$) — editável manualmente</label>
+                      <label style={lbl}>Meta líquida (R$) — após descontar operacional</label>
+
             <input type="number" step="0.01"
               style={{ ...inp, borderColor: metaBrutaEditada ? 'rgba(var(--accent-rgb),.4)' : 'rgba(255,255,255,.1)' }}
               value={config.meta_bruta_sugerida}
