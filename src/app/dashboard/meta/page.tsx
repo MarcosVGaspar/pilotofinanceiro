@@ -121,9 +121,10 @@ export default function MetaPage() {
     </div>
   )
 
-  // Valores exibidos dependem do modo
+    // Bruto = corridas + renda fixa | Líquido = bruto - operacional
+  const faturamentoBruto = totalCorridas + rendaFixa
   const metaExibida      = modoBruto ? metaBruta : metaLiquida
-  const progressoExibido = modoBruto ? totalCorridas : Math.max(totalCorridas - totalOperacional, 0)
+  const progressoExibido = modoBruto ? faturamentoBruto : Math.max(faturamentoBruto - totalOperacional, 0)
   const pct              = metaExibida > 0 ? Math.min((progressoExibido / metaExibida) * 100, 100) : 0
 
   return (
