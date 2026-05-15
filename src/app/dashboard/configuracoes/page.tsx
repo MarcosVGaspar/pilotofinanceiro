@@ -1,29 +1,19 @@
 'use client'
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-
-function calcMetaBruta(metaLiquida: number, custoFixo: number, rendaFixa: number): number {
-  // Meta bruta = (meta líquida + custos fixos - renda fixa) com margem mínima de 0
-  const resultado = metaLiquida + custoFixo - rendaFixa
-  return Math.max(0, resultado)
-}
 
 export default function ConfigPage() {
   const supabase = createClient()
   const router = useRouter()
   const [saved, setSaved] = useState(false)
-  const [profile, setProfile] = useState({
-    nome: '', cidade: '', meta_corridas: ''
-  })
+  const [profile, setProfile] = useState({ nome: '', cidade: '', meta_corridas: '' })
   const [config, setConfig] = useState({
-    preco_gasolina: '', preco_etanol: '',
-    preco_diesel: '', consumo_medio: '',
+    preco_gasolina: '', preco_etanol: '', preco_diesel: '', consumo_medio: '',
     custo_fixo_veiculo: '', renda_fixa_mensal: '',
-    meta_liquida: '', meta_bruta_sugerida: '',
+    meta_bruta: '', meta_liquida: '',
     accent_color: '#00FF87',
   })
-  const [metaBrutaEditada, setMetaBrutaEditada] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -34,8 +24,7 @@ export default function ConfigPage() {
         supabase.from('configuracoes').select('*').eq('user_id', user.id).single(),
       ])
       if (p) setProfile({
-        nome: p.nome || '',
-        cidade: p.cidade || '',
+        nome: p.nome || '', cidade: p.cidade || '',
         meta_corridas: String(p.meta_corridas || ''),
       })
       if (c) setConfig({
@@ -45,38 +34,30 @@ export default function ConfigPage() {
         consumo_medio: String(c.consumo_medio || ''),
         custo_fixo_veiculo: String(c.custo_fixo_veiculo || ''),
         renda_fixa_mensal: String(c.renda_fixa_mensal || ''),
+        meta_bruta: String(c.meta_bruta_sugerida || c.meta_mensal || ''),
         meta_liquida: String(c.meta_liquida || ''),
-        meta_bruta_sugerida: String(c.meta_bruta_sugerida || ''),
         accent_color: c.accent_color || '#00FF87',
       })
     }
     load()
   }, [supabase])
 
-  // Recalcula meta bruta sugerida automaticamente quando mudam os inputs
-  useEffect(() => {
-    if (metaBrutaEditada) return
-    const ml = parseFloat(config.meta_liquida) || 0
-    const cf = parseFloat(config.custo_fixo_veiculo) || 0
-    const rf = parseFloat(config.renda_fixa_mensal) || 0
-    if (ml > 0) {
-      const sugerida = calcMetaBruta(ml, cf, rf)
-      setConfig(prev => ({ ...prev, meta_bruta_sugerida: String(sugerida.toFixed(2)) }))
-    }
-  }, [config.meta_liquida, config.custo_fixo_veiculo, config.renda_fixa_mensal, metaBrutaEditada])
+  // Meta líquida sugerida = meta bruta - custo fixo
+  const metaBrutaNum  = parseFloat(config.meta_bruta) || 0
+  const custoFixoNum  = parseFloat(config.custo_fixo_veiculo) || 0
+  const metaLiqSugerida = Math.max(metaBrutaNum - custoFixoNum, 0)
 
   async function saveAll() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
 
-    const rendaFixa = parseFloat(config.renda_fixa_mensal) || 0
-    const metaLiquida = parseFloat(config.meta_liquida) || 0
-    const metaBruta = parseFloat(config.meta_bruta_sugerida) || 0
+    const rendaFixa  = parseFloat(config.renda_fixa_mensal) || 0
+    const metaBruta  = parseFloat(config.meta_bruta) || 0
+    const metaLiq    = parseFloat(config.meta_liquida) || metaLiqSugerida
 
     await Promise.all([
       supabase.from('profiles').update({
-        nome: profile.nome,
-        cidade: profile.cidade,
+        nome: profile.nome, cidade: profile.cidade,
         meta_mensal: metaBruta,
         meta_corridas: parseInt(profile.meta_corridas) || 0,
       }).eq('id', user.id),
@@ -85,10 +66,10 @@ export default function ConfigPage() {
         preco_etanol: parseFloat(config.preco_etanol) || 0,
         preco_diesel: parseFloat(config.preco_diesel) || 0,
         consumo_medio: parseFloat(config.consumo_medio) || 0,
-        custo_fixo_veiculo: parseFloat(config.custo_fixo_veiculo) || 0,
+        custo_fixo_veiculo: custoFixoNum,
         renda_fixa_mensal: rendaFixa,
-        meta_liquida: metaLiquida,
         meta_bruta_sugerida: metaBruta,
+        meta_liquida: metaLiq,
         accent_color: config.accent_color,
       }).eq('user_id', user.id),
     ])
@@ -96,18 +77,13 @@ export default function ConfigPage() {
     if (rendaFixa > 0) {
       const now = new Date()
       const primeiroDia = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`
-      const { data: existing } = await supabase
-        .from('rendas').select('id')
-        .eq('user_id', user.id)
-        .eq('tipo', 'salario')
-        .eq('recorrencia', 'mensal')
-        .gte('data', primeiroDia)
-        .single()
+      const { data: existing } = await supabase.from('rendas').select('id')
+        .eq('user_id', user.id).eq('tipo', 'salario').eq('recorrencia', 'mensal')
+        .gte('data', primeiroDia).single()
       if (!existing) {
         await supabase.from('rendas').insert({
-          user_id: user.id, tipo: 'salario',
-          descricao: 'Renda fixa mensal', valor: rendaFixa,
-          data: primeiroDia, recorrencia: 'mensal', recebido: true,
+          user_id: user.id, tipo: 'salario', descricao: 'Renda fixa mensal',
+          valor: rendaFixa, data: primeiroDia, recorrencia: 'mensal', recebido: true,
         })
       }
     }
@@ -124,36 +100,26 @@ export default function ConfigPage() {
 
   const inp: React.CSSProperties = {
     width: '100%', padding: '11px 14px',
-    background: 'rgba(255,255,255,.03)',
-    border: '1px solid rgba(255,255,255,.1)',
-    borderRadius: '8px', color: 'var(--text-1)',
-    fontFamily: 'inherit', fontSize: '14px',
-    outline: 'none', boxSizing: 'border-box',
+    background: 'rgba(255,255,255,.03)', border: '1px solid rgba(255,255,255,.1)',
+    borderRadius: '8px', color: 'var(--text-1)', fontFamily: 'inherit',
+    fontSize: '14px', outline: 'none', boxSizing: 'border-box',
   }
   const lbl: React.CSSProperties = {
     display: 'block', fontSize: '11px', fontWeight: 700,
     textTransform: 'uppercase', letterSpacing: '.1em',
-    color: 'var(--text-3)', marginBottom: '7px'
+    color: 'var(--text-3)', marginBottom: '7px',
   }
   const card: React.CSSProperties = {
-    background: 'rgba(13,18,32,.9)',
-    border: '1px solid rgba(255,255,255,.1)',
-    borderRadius: '20px', padding: '20px', marginBottom: '14px'
+    background: 'rgba(13,18,32,.9)', border: '1px solid rgba(255,255,255,.1)',
+    borderRadius: '20px', padding: '20px', marginBottom: '14px',
   }
   const grid2: React.CSSProperties = {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(2, minmax(0,1fr))',
-    gap: '10px',
+    display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0,1fr))', gap: '10px',
   }
-  const sectionTitle: React.CSSProperties = {
+  const ttl: React.CSSProperties = {
     fontFamily: 'var(--font-display)', fontSize: '14px',
-    fontWeight: 700, color: 'var(--text-1)', marginBottom: '14px'
+    fontWeight: 700, color: 'var(--text-1)', marginBottom: '14px',
   }
-
-  const metaLiquidaNum = parseFloat(config.meta_liquida) || 0
-  const custoFixoNum   = parseFloat(config.custo_fixo_veiculo) || 0
-  const rendaFixaNum   = parseFloat(config.renda_fixa_mensal) || 0
-  const metaBrutaCalc  = calcMetaBruta(metaLiquidaNum, custoFixoNum, rendaFixaNum)
 
   return (
     <div className="anim-fade" style={{ maxWidth: '640px' }}>
@@ -172,7 +138,7 @@ export default function ConfigPage() {
 
       {/* PERFIL */}
       <div style={card}>
-        <p style={sectionTitle}>👤 Perfil</p>
+        <p style={ttl}>👤 Perfil</p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           <div>
             <label style={lbl}>Nome</label>
@@ -194,90 +160,67 @@ export default function ConfigPage() {
         </div>
       </div>
 
-      {/* META BRUTA vs LÍQUIDA */}
+      {/* META */}
       <div style={{ ...card, border: '1px solid rgba(var(--accent-rgb),.2)', background: 'linear-gradient(135deg, rgba(var(--accent-rgb),.04) 0%, rgba(13,18,32,.95) 100%)' }}>
-        <p style={sectionTitle}>🎯 Meta Mensal</p>
-              <p style={{ fontSize: '12px', color: 'var(--text-3)', marginBottom: '14px', lineHeight: 1.5 }}>
-          <strong style={{ color: 'var(--text-2)' }}>Meta Bruta</strong> = tudo que entra (corridas + renda extra).<br/>
+        <p style={ttl}>🎯 Meta Mensal</p>
+        <p style={{ fontSize: '12px', color: 'var(--text-3)', marginBottom: '14px', lineHeight: 1.6 }}>
+          <strong style={{ color: 'var(--text-2)' }}>Meta Bruta</strong> = tudo que entra (corridas + renda extra).<br />
           <strong style={{ color: 'var(--text-2)' }}>Meta Líquida</strong> = bruto menos custos operacionais (gasolina, manutenção, etc.)
         </p>
 
-        </p>
-
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  <div>
-            <label style={lbl}>Meta bruta (R$) — total que quer receber no mês</label>
-
+          {/* Meta bruta */}
+          <div>
+            <label style={lbl}>Meta Bruta (R$) — total que quer receber no mês</label>
             <input type="number" step="0.01" style={inp}
-              value={config.meta_liquida}
-              placeholder="Ex: 3000,00"
-              onChange={e => {
-                setConfig({ ...config, meta_liquida: e.target.value })
-                setMetaBrutaEditada(false)
-              }} />
+              value={config.meta_bruta} placeholder="Ex: 5900,00"
+              onChange={e => setConfig({ ...config, meta_bruta: e.target.value })} />
           </div>
 
-          {/* Card de sugestão */}
-          {metaLiquidaNum > 0 && (
-            <div style={{ padding: '14px', borderRadius: '12px', background: 'rgba(var(--accent-rgb),.06)', border: '1px solid rgba(var(--accent-rgb),.2)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px', marginBottom: '10px' }}>
-                <p style={{ fontSize: '12px', color: 'var(--text-2)', fontWeight: 600 }}>💡 Meta bruta sugerida</p>
-                <p style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 800, color: 'var(--accent)' }}>
-                  R$ {metaBrutaCalc.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </p>
-              </div>
-              <div style={{ fontSize: '11px', color: 'var(--text-3)', display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                <span>Meta líquida: <strong style={{ color: 'var(--text-2)' }}>R$ {metaLiquidaNum.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong></span>
-                <span>+ Custo fixo veículo: <strong style={{ color: 'var(--text-2)' }}>R$ {custoFixoNum.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong></span>
-                <span>− Renda fixa: <strong style={{ color: 'var(--text-2)' }}>R$ {rendaFixaNum.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong></span>
+          {/* Sugestão de líquida */}
+          {metaBrutaNum > 0 && (
+            <div style={{ padding: '12px 14px', borderRadius: '12px', background: 'rgba(var(--accent-rgb),.06)', border: '1px solid rgba(var(--accent-rgb),.18)' }}>
+              <p style={{ fontSize: '11px', color: 'var(--text-3)', marginBottom: '6px' }}>
+                💡 Meta líquida sugerida (bruta − custo fixo):
+              </p>
+              <p style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 800, color: 'var(--accent)' }}>
+                R$ {metaLiqSugerida.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              </p>
+              <div style={{ fontSize: '11px', color: 'var(--text-3)', marginTop: '6px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                <span>Meta bruta: <strong style={{ color: 'var(--text-2)' }}>R$ {metaBrutaNum.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong></span>
+                <span>− Custo fixo veículo: <strong style={{ color: 'var(--text-2)' }}>R$ {custoFixoNum.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong></span>
               </div>
             </div>
           )}
 
-                      <label style={lbl}>Meta líquida (R$) — após descontar operacional</label>
-
-            <input type="number" step="0.01"
-              style={{ ...inp, borderColor: metaBrutaEditada ? 'rgba(var(--accent-rgb),.4)' : 'rgba(255,255,255,.1)' }}
-              value={config.meta_bruta_sugerida}
-              placeholder="Calculado automaticamente"
-              onChange={e => {
-                setConfig({ ...config, meta_bruta_sugerida: e.target.value })
-                setMetaBrutaEditada(true)
-              }} />
-            {metaBrutaEditada && (
-              <button style={{ marginTop: '6px', fontSize: '11px', color: 'var(--text-3)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
-                onClick={() => {
-                  setMetaBrutaEditada(false)
-                  setConfig(prev => ({ ...prev, meta_bruta_sugerida: String(metaBrutaCalc.toFixed(2)) }))
-                }}>
-                ↩ Restaurar valor sugerido
-              </button>
-            )}
+          {/* Meta líquida editável */}
+          <div>
+            <label style={lbl}>Meta Líquida (R$) — editável manualmente</label>
+            <input type="number" step="0.01" style={inp}
+              value={config.meta_liquida}
+              placeholder={metaLiqSugerida > 0 ? `Sugerido: ${metaLiqSugerida.toFixed(2)}` : 'Ex: 5500,00'}
+              onChange={e => setConfig({ ...config, meta_liquida: e.target.value })} />
           </div>
         </div>
       </div>
 
       {/* RENDA FIXA */}
       <div style={card}>
-        <p style={sectionTitle}>💰 Renda Fixa Mensal</p>
+        <p style={ttl}>💰 Renda Fixa Mensal</p>
         <p style={{ fontSize: '12px', color: 'var(--text-3)', marginBottom: '12px', lineHeight: 1.5 }}>
-          Salário, benefício ou qualquer renda garantida. Desconta da meta bruta que precisa fazer com corridas.
+          Salário, benefício ou qualquer renda garantida que entra todo mês.
         </p>
         <div>
           <label style={lbl}>Valor (R$)</label>
           <input type="number" step="0.01" style={inp}
-            value={config.renda_fixa_mensal}
-            onChange={e => {
-              setConfig({ ...config, renda_fixa_mensal: e.target.value })
-              setMetaBrutaEditada(false)
-            }}
-            placeholder="Ex: 1500,00" />
+            value={config.renda_fixa_mensal} placeholder="Ex: 2900,00"
+            onChange={e => setConfig({ ...config, renda_fixa_mensal: e.target.value })} />
         </div>
       </div>
 
       {/* COMBUSTÍVEL */}
       <div style={card}>
-        <p style={sectionTitle}>⛽ Combustível & Veículo</p>
+        <p style={ttl}>⛽ Combustível & Veículo</p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           <div style={grid2}>
             <div>
@@ -304,17 +247,14 @@ export default function ConfigPage() {
           <div>
             <label style={lbl}>Custo fixo veículo/mês (R$)</label>
             <input type="number" step="0.01" style={inp} value={config.custo_fixo_veiculo}
-              onChange={e => {
-                setConfig({ ...config, custo_fixo_veiculo: e.target.value })
-                setMetaBrutaEditada(false)
-              }} />
+              onChange={e => setConfig({ ...config, custo_fixo_veiculo: e.target.value })} />
           </div>
         </div>
       </div>
 
       {/* COR DE DESTAQUE */}
       <div style={card}>
-        <p style={sectionTitle}>🎨 Cor de Destaque</p>
+        <p style={ttl}>🎨 Cor de Destaque</p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '10px' }}>
           {[
             { color: '#00FF87', label: 'Verde' },
@@ -336,8 +276,7 @@ export default function ConfigPage() {
               style={{
                 width: '100%', aspectRatio: '1', borderRadius: '50%',
                 background: color, border: 'none', cursor: 'pointer',
-                boxShadow: config.accent_color === color
-                  ? `0 0 0 3px var(--bg-card), 0 0 0 5px ${color}` : 'none',
+                boxShadow: config.accent_color === color ? `0 0 0 3px var(--bg-card), 0 0 0 5px ${color}` : 'none',
                 transform: config.accent_color === color ? 'scale(1.15)' : 'scale(1)',
                 transition: 'all .2s',
               }}
