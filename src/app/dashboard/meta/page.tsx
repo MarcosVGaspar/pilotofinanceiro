@@ -10,22 +10,29 @@ export default function MetaPage() {
   const [loading, setLoading] = useState(true)
   const [modoBruto, setModoBruto] = useState(true)
 
-  // Meta
+  // Metas configuradas
   const [metaBruta, setMetaBruta] = useState(0)
   const [metaLiquida, setMetaLiquida] = useState(0)
   const [metaBrutaSugerida, setMetaBrutaSugerida] = useState(0)
   const [margemHistorica, setMargemHistorica] = useState(0)
   const [periodoMargem, setPeriodoMargem] = useState(3)
 
-  // Progresso
+  // Progresso real do mês
   const [totalCorridas, setTotalCorridas] = useState(0)
-  const [totalOperacional, setTotalOperacional] = useState(0)
+  const [totalOpReal, setTotalOpReal] = useState(0)    // operacional REAL do mês
+  const [totalOpMedia, setTotalOpMedia] = useState(0)  // média histórica (para meta diária)
   const [rendaFixa, setRendaFixa] = useState(0)
-  const [metaDiaria, setMetaDiaria] = useState(0)
-  const [metaDiariaAjustada, setMetaDiariaAjustada] = useState(0)
+
+  // Meta diária — bruto e líquido separados
+  const [metaDiariaBruto, setMetaDiariaBruto] = useState(0)
+  const [metaDiariaLiq, setMetaDiariaLiq] = useState(0)
+  const [metaAjustadaBruto, setMetaAjustadaBruto] = useState(0)
+  const [metaAjustadaLiq, setMetaAjustadaLiq] = useState(0)
+  const [faltaBruto, setFaltaBruto] = useState(0)
+  const [faltaLiq, setFaltaLiq] = useState(0)
+
   const [diasPassados, setDiasPassados] = useState(0)
   const [diasRestantes, setDiasRestantes] = useState(0)
-  const [faltaMes, setFaltaMes] = useState(0)
   const [dias, setDias] = useState<any[]>([])
 
   useEffect(() => {
@@ -33,26 +40,35 @@ export default function MetaPage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
 
-      const now    = new Date()
-      const ano    = now.getFullYear()
-      const mes    = now.getMonth() + 1
-      const ym     = `${ano}-${String(mes).padStart(2, '0')}`
-      const diasNM = new Date(ano, mes, 0).getDate()
+      const now      = new Date()
+      const ano      = now.getFullYear()
+      const mes      = now.getMonth() + 1
+      const ym       = `${ano}-${String(mes).padStart(2, '0')}`
+      const diasNM   = new Date(ano, mes, 0).getDate()
       const diaAtual = now.getDate()
+      const diasRest = diasNM - diaAtual
 
-      const [{ data: config }, { data: corridas }] = await Promise.all([
+      const [{ data: config }, { data: corridas }, { data: despMes }, { data: abastMes }, { data: manutMes }] = await Promise.all([
         supabase.from('configuracoes').select('*').eq('user_id', user.id).single(),
         supabase.from('corridas').select('data,valor').eq('user_id', user.id).gte('data', `${ym}-01`),
+        supabase.from('despesas').select('valor,categoria,operacional').eq('user_id', user.id).gte('data', `${ym}-01`),
+        supabase.from('abastecimentos').select('valor_total').eq('user_id', user.id).gte('data', `${ym}-01`),
+        supabase.from('manutencoes').select('valor').eq('user_id', user.id).gte('data', `${ym}-01`),
       ])
 
-      // Lê os valores salvos das configurações
-      const mBruta   = Number(config?.meta_bruta_sugerida || 0)
-      const mLiq     = Number(config?.meta_liquida || 0)
-      const rendaF   = Number(config?.renda_fixa_mensal || 0)
-      const periodo  = Number(config?.periodo_margem || 3)
-      const catsOp   = config?.categorias_operacionais || ['combustivel','manutencao_veiculo','seguro','impostos']
+      const mBruta  = Number(config?.meta_bruta_sugerida || 0)
+      const mLiq    = Number(config?.meta_liquida || 0)
+      const rendaF  = Number(config?.renda_fixa_mensal || 0)
+      const periodo = Number(config?.periodo_margem || 3)
+      const catsOp  = config?.categorias_operacionais || ['combustivel','manutencao_veiculo','seguro','impostos']
 
-      // Histórico para calcular margem
+      // Operacional REAL do mês atual
+      const opRealMes =
+        (despMes || []).filter((x: any) => x.operacional || catsOp.includes(x.categoria)).reduce((a: number, x: any) => a + Number(x.valor), 0) +
+        (abastMes || []).reduce((a: number, x: any) => a + Number(x.valor_total || 0), 0) +
+        (manutMes || []).reduce((a: number, x: any) => a + Number(x.valor || 0), 0)
+
+      // Histórico para calcular margem e média operacional
       const dataInicio = new Date()
       dataInicio.setMonth(dataInicio.getMonth() - periodo)
       const dataInicioStr = dataInicio.getFullYear() + '-' + String(dataInicio.getMonth() + 1).padStart(2, '0') + '-01'
@@ -64,47 +80,61 @@ export default function MetaPage() {
         supabase.from('manutencoes').select('valor').eq('user_id', user.id).gte('data', dataInicioStr),
       ])
 
-      const totalBrutoHist = (histCorridas || []).reduce((a: number, x: any) => a + Number(x.valor), 0)
+      const totalBrutoHist =
+        (histCorridas || []).reduce((a: number, x: any) => a + Number(x.valor), 0)
       const totalOpHist =
         (histDespesas || []).filter((x: any) => x.operacional || catsOp.includes(x.categoria)).reduce((a: number, x: any) => a + Number(x.valor), 0) +
         (histAbast || []).reduce((a: number, x: any) => a + Number(x.valor_total || 0), 0) +
         (histManut || []).reduce((a: number, x: any) => a + Number(x.valor || 0), 0)
 
-      const margem       = totalBrutoHist > 0 ? (totalBrutoHist - totalOpHist) / totalBrutoHist : 0.8
-      const brutaSugerida = mLiq > 0 && margem > 0 ? mLiq / margem : mBruta
-      const totalOpMes   = totalOpHist / periodo
+      // Média mensal operacional histórica
+      const opMedia  = totalOpHist / periodo
+      const margem   = totalBrutoHist > 0 ? (totalBrutoHist - totalOpHist) / totalBrutoHist : 0.8
+      const brutaSug = mLiq > 0 && margem > 0 ? mLiq / margem : mBruta
 
-      // Meta de corridas = meta bruta - renda fixa
-      const metaCorridasMes  = mBruta > 0 ? Math.max(mBruta - rendaF, 0) : 0
-      const metaDiariaBase   = metaCorridasMes > 0 ? metaCorridasMes / diasNM : 0
+      const totalGanho = (corridas || []).reduce((a: number, c: any) => a + Number(c.valor), 0)
 
-      const totalGanho       = (corridas || []).reduce((a: number, c: any) => a + Number(c.valor), 0)
-      const falta            = Math.max(metaCorridasMes - totalGanho, 0)
-      const diasRest         = diasNM - diaAtual
-      const metaAjustada     = diasRest > 0 ? falta / diasRest : 0
+      // META DIÁRIA BRUTA
+      // Quanto precisa faturar com corridas por dia (meta bruta - renda fixa)
+      const metaCorridasBruto   = mBruta > 0 ? Math.max(mBruta - rendaF, 0) : 0
+      const metaDiariaBaseBruto = metaCorridasBruto > 0 ? metaCorridasBruto / diasNM : 0
+      const faltaB              = Math.max(metaCorridasBruto - totalGanho, 0)
+      const ajustadaB           = diasRest > 0 ? faltaB / diasRest : 0
+
+      // META DIÁRIA LÍQUIDA
+      // Quanto precisa faturar com corridas por dia para sobrar mLiq depois de pagar operacional
+      // Usa média histórica para projetar o operacional futuro
+      const metaCorridasLiq   = mLiq > 0 ? Math.max(mLiq - rendaF + opMedia, 0) : 0
+      const metaDiariaBaseLiq = metaCorridasLiq > 0 ? metaCorridasLiq / diasNM : 0
+      const faltaL            = Math.max(metaCorridasLiq - totalGanho, 0)
+      const ajustadaL         = diasRest > 0 ? faltaL / diasRest : 0
 
       setMetaBruta(mBruta)
       setMetaLiquida(mLiq)
-      setMetaBrutaSugerida(brutaSugerida)
+      setMetaBrutaSugerida(brutaSug)
       setMargemHistorica(margem * 100)
       setPeriodoMargem(periodo)
-      setTotalOperacional(totalOpMes)
       setTotalCorridas(totalGanho)
+      setTotalOpReal(opRealMes)
+      setTotalOpMedia(opMedia)
       setRendaFixa(rendaF)
-      setMetaDiaria(metaDiariaBase)
-      setMetaDiariaAjustada(metaAjustada)
+      setMetaDiariaBruto(metaDiariaBaseBruto)
+      setMetaDiariaLiq(metaDiariaBaseLiq)
+      setMetaAjustadaBruto(ajustadaB)
+      setMetaAjustadaLiq(ajustadaL)
+      setFaltaBruto(faltaB)
+      setFaltaLiq(faltaL)
       setDiasPassados(diaAtual)
       setDiasRestantes(diasRest)
-      setFaltaMes(falta)
 
-      // Calendário
+      // Calendário — usa meta diária bruta para pintar os dias
       const diasArr = Array.from({ length: diasNM }, (_, i) => {
-        const dia = i + 1
-        const ds  = `${ym}-${String(dia).padStart(2, '0')}`
+        const dia   = i + 1
+        const ds    = `${ym}-${String(dia).padStart(2, '0')}`
         const ganho = (corridas || [])
           .filter((c: any) => c.data === ds)
           .reduce((a: number, c: any) => a + Number(c.valor), 0)
-        return { dia, ds, ganho, bateu: ganho >= metaDiariaBase, futuro: dia > diaAtual }
+        return { dia, ds, ganho, bateu: ganho >= metaDiariaBaseBruto, futuro: dia > diaAtual }
       })
       setDias(diasArr)
       setLoading(false)
@@ -121,11 +151,18 @@ export default function MetaPage() {
     </div>
   )
 
-    // Bruto = corridas + renda fixa | Líquido = bruto - operacional
+  // Saldo exibido:
+  // Bruto  = corridas + renda fixa (tudo que entrou)
+  // Líquido = corridas + renda fixa - operacional REAL do mês
   const faturamentoBruto = totalCorridas + rendaFixa
-  const metaExibida      = modoBruto ? metaBruta : metaLiquida
-  const progressoExibido = modoBruto ? faturamentoBruto : Math.max(faturamentoBruto - totalOperacional, 0)
-  const pct              = metaExibida > 0 ? Math.min((progressoExibido / metaExibida) * 100, 100) : 0
+  const saldoLiquido     = faturamentoBruto - totalOpReal
+
+  const metaDiaria     = modoBruto ? metaDiariaBruto : metaDiariaLiq
+  const metaAjustada   = modoBruto ? metaAjustadaBruto : metaAjustadaLiq
+  const faltaMes       = modoBruto ? faltaBruto : faltaLiq
+  const progresso      = modoBruto ? faturamentoBruto : saldoLiquido
+  const metaExibida    = modoBruto ? metaBruta : metaLiquida
+  const pct            = metaExibida > 0 ? Math.min((progresso / metaExibida) * 100, 100) : 0
 
   return (
     <div style={{ maxWidth: '100%', overflow: 'hidden' }}>
@@ -136,7 +173,7 @@ export default function MetaPage() {
         Acompanhe seu progresso dia a dia
       </p>
 
-      {/* Toggle Bruto / Líquido */}
+      {/* Toggle */}
       {metaLiquida > 0 && (
         <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
           <button onClick={() => setModoBruto(true)} style={{
@@ -165,14 +202,16 @@ export default function MetaPage() {
         </div>
         <div className="glass-card" style={{ padding: '16px', border: '1px solid rgba(0,212,255,.2)' }}>
           <p style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em', color: 'var(--text-3)', marginBottom: '6px' }}>Meta Ajustada</p>
-          <p style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 800, color: 'var(--cyan)' }}>{fmt$(metaDiariaAjustada)}</p>
+          <p style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 800, color: 'var(--cyan)' }}>{fmt$(metaAjustada)}</p>
           <p style={{ fontSize: '11px', color: 'var(--text-3)', marginTop: '2px' }}>próximos {diasRestantes} dias</p>
         </div>
         <div className="glass-card" style={{ padding: '16px' }}>
           <p style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em', color: 'var(--text-3)', marginBottom: '6px' }}>
-            {modoBruto ? 'Ganho este mês' : 'Líquido este mês'}
+            {modoBruto ? 'Faturado este mês' : 'Líquido este mês'}
           </p>
-          <p style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 800, color: 'var(--success)' }}>{fmt$(progressoExibido)}</p>
+          <p style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 800, color: 'var(--success)' }}>
+            {fmt$(progresso)}
+          </p>
           <p style={{ fontSize: '11px', color: 'var(--text-3)', marginTop: '2px' }}>{diasPassados} dias</p>
         </div>
         <div className="glass-card" style={{ padding: '16px' }}>
@@ -196,7 +235,7 @@ export default function MetaPage() {
           <div className={'progress-fill ' + (pct >= 100 ? 'green' : pct >= 70 ? 'yellow' : 'green')} style={{ width: pct + '%' }} />
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px' }}>
-          <p style={{ fontSize: '11px', color: 'var(--text-3)' }}>{fmt$(progressoExibido)} acumulado</p>
+          <p style={{ fontSize: '11px', color: 'var(--text-3)' }}>{fmt$(progresso)} acumulado</p>
           <p style={{ fontSize: '11px', color: 'var(--text-3)' }}>Meta: {fmt$(metaExibida)}</p>
         </div>
       </div>
@@ -226,6 +265,12 @@ export default function MetaPage() {
                 </span>
               )}
             </p>
+            {totalOpReal > 0 && (
+              <p style={{ fontSize: '11px', color: 'var(--text-3)', marginTop: '6px' }}>
+                Operacional real este mês: <strong style={{ color: 'var(--danger)' }}>{fmt$(totalOpReal)}</strong>
+                {totalOpMedia > 0 && <span> · Média histórica: <strong>{fmt$(totalOpMedia)}</strong>/mês</span>}
+              </p>
+            )}
           </div>
         </div>
       )}
@@ -262,9 +307,9 @@ export default function MetaPage() {
         </div>
         <div style={{ display: 'flex', gap: '16px', marginTop: '12px', justifyContent: 'center' }}>
           {[
-            ['rgba(var(--accent-rgb),.12)', 'rgba(var(--accent-rgb),.25)', 'var(--accent)', 'Meta atingida'],
-            ['rgba(255,71,87,.12)', 'rgba(255,71,87,.25)', 'var(--danger)', 'Abaixo da meta'],
-          ].map(([bg, border, color, label]) => (
+            ['rgba(var(--accent-rgb),.12)', 'rgba(var(--accent-rgb),.25)', 'Meta atingida'],
+            ['rgba(255,71,87,.12)', 'rgba(255,71,87,.25)', 'Abaixo da meta'],
+          ].map(([bg, border, label]) => (
             <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <div style={{ width: '16px', height: '16px', borderRadius: '4px', background: bg, border: `1px solid ${border}` }} />
               <span style={{ fontSize: '11px', color: 'var(--text-3)' }}>{label}</span>
