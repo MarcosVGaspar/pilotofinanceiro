@@ -54,8 +54,9 @@ export default function DashboardPage() {
              + manutencoes.reduce((a: number, x: any) => a + Number(x.valor || 0), 0)
       const qc = corridas.reduce((a: number, x: any) => a + (x.quantidade_corridas || 1), 0)
 
+            const catsOp = ['combustivel', 'manutencao_veiculo', 'seguro', 'impostos']
       const tOp = despesas
-        .filter((x: any) => x.operacional)
+        .filter((x: any) => x.operacional || catsOp.includes(x.categoria))
         .reduce((a: number, x: any) => a + Number(x.valor), 0)
         + abastecimentos.reduce((a: number, x: any) => a + Number(x.valor_total || 0), 0)
         + manutencoes.reduce((a: number, x: any) => a + Number(x.valor || 0), 0)
@@ -96,8 +97,13 @@ export default function DashboardPage() {
           (a5.data || []).filter((x: any) => x.data?.startsWith(mo)).reduce((a: number, x: any) => a + Number(x.valor || 0), 0),
       }))
 
-      const ct: Record<string, number> = {}
+            const ct: Record<string, number> = {}
       despesas.forEach((x: any) => { ct[x.categoria] = (ct[x.categoria] || 0) + Number(x.valor) })
+      const totalAbast = abastecimentos.reduce((a: number, x: any) => a + Number(x.valor_total || 0), 0)
+      const totalManut = manutencoes.reduce((a: number, x: any) => a + Number(x.valor || 0), 0)
+      if (totalAbast > 0) ct['combustivel'] = (ct['combustivel'] || 0) + totalAbast
+      if (totalManut > 0) ct['manutencao_veiculo'] = (ct['manutencao_veiculo'] || 0) + totalManut
+
 
       setChartData(cd)
       setCatTotals(ct)
